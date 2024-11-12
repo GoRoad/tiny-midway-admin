@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
+}
+
+model User {
+  id               Int       @id @default(autoincrement())
+  email            String?
+  phone            String?
+  nickName         String
+  address          String?
+  system           Boolean?  @default(false)
+  passwordVersion  Int       @default(1)
+  gender           Int?
+  avatar           String?   @default("https://s1.imagehub.cc/images/2024/10/22/d99f96eaf4ec45e7b2f5eb19c66303d6.gif")
+  username         String    @unique
+  password         String // 添加密码字段
+  createTime       DateTime  @default(now())
+  updateTime       DateTime  @updatedAt
+  // 关联表
+  posts            Post[]    @relation("Posts")
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String // 消息内容
+  senderId   Int // 发送者 ID
+  receiverId Int // 接收者 ID
+  isRead     Boolean  @default(false) // 是否已读
+  createTime DateTime @default(now()) // 发送时间
+  updateTime DateTime @updatedAt
+  // 关联关系
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@map("messages")
+}
+
+model Post {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String?
+  published  Boolean  @default(false)
+  authorId   Int
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  author User @relation("Posts", fields: [authorId], references: [id])
+
+  @@map("post")
+}
+
+model Demo {
+  id         Int      @id @default(autoincrement())
+  name       String
+  gender     Int
+  desc       String?
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  @@map("demo")
+}
+
+model Department {
+  id         Int          @id @default(autoincrement())
+  name       String
+  parentId   Int?         @map("parent_id")
+  parent     Department?  @relation("DepartmentToDepartment", fields: [parentId], references: [id])
+  children   Department[] @relation("DepartmentToDepartment")
+  roles      Role[]       @relation("DepartmentRole")
+  createTime DateTime     @default(now())
+  updateTime DateTime     @updatedAt
+
+  @@map("departments")
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String
+  code        String
+  system      Boolean?     @default(false)
+  departments Department[] @relation("DepartmentRole")
+  createTime  DateTime     @default(now())
+  updateTime  DateTime     @updatedAt
+
+  @@map("roles")
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  name        String
+  code        String
+  type        String   @default("MENU")
+  parentId    Int?     @map("parent_id")
+  path        String?
+  redirect    String?
+  icon        String?
+  component   String?
+  layout      String?
+  keepAlive   Boolean?
+  method      String?
+  description String?
+  show        Boolean  @default(true)
+  enable      Boolean  @default(true)
+  order       Int
+
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  parent   Resource?  @relation("MenuToMenu", fields: [parentId], references: [id])
+  children Resource[] @relation("MenuToMenu")
+
+  @@map("resource")
+}
+
+model Dict {
+  id         Int      @id @default(autoincrement())
+  name       String
+  code       String
+  json       String
+  remark     String?
+  enabled    Boolean
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  @@map("dict")
+}
+
+model FileCategory {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+  system     Boolean  @default(false)
+
+  files File[] // 关联到 File 表
+
+  @@map("file_category")
+}
+
+model File {
+  id         Int     @id @default(autoincrement())
+  fileName   String // 文件名
+  filePath   String // 文件路径
+  mimeType   String // 文件 MIME 类型
+  size       Int // 文件大小（字节）
+  categoryId Int     @default(1) // 文件分类
+  source     String // 上传来源local、cos、alioss
+  userId     Int // 上传者 ID（可选）
+  remark     String? // 备注（可选）
+
+  createTime DateTime     @default(now()) // 上传时间
+  updateTime DateTime     @updatedAt
+  category   FileCategory @relation(fields: [categoryId], references: [id])
+
+  @@map("file")
+}

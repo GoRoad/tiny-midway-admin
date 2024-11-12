@@ -1,0 +1,26 @@
+# docker-compose -f admin-compose.yml up -d
+
+version: '3'
+
+services:
+  server:
+    container_name: admin-serve
+    image: liohao/home-server:latest
+    ports:
+      - 7001:7001
+    networks:
+      - admin-net
+
+  admin:
+    container_name: admin
+    image: liohao/home-admin:latest
+    ports:
+      - 3003:80
+    networks:
+      - admin-net
+    depends_on:
+      - server
+
+networks:
+  admin-net:
+    driver: bridge

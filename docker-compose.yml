@@ -1,0 +1,40 @@
+# 命令在项目根目录执行
+
+# docker compose up -d 以守护进程（detached）模式运行，即在后台运行服务而不会阻塞终端。
+# 会根据构建上下文中的文件哈希值来判断是否需要重新构建镜像
+
+# docker compose restart 重启所有服务
+
+# docker-compose build 编译、重新编译本项目所有镜像
+# docker-compose build web 编译本项目services.web项目
+
+version: '2'
+
+networks:
+  admin-net:
+    driver: bridge
+
+services:
+  server:
+    container_name: admin-serve
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    expose:
+      - 7001
+    # 需要映射端口，为避免跨域admin使用nginx的反向代理url将/v1/转发到7001
+    ports:
+      - 7001:7001
+    networks:
+      - admin-net
+  admin:
+    container_name: admin
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - 3003:80
+    networks:
+      - admin-net
+    depends_on:
+      - server
