@@ -18,7 +18,7 @@ COPY . .
 RUN set -x && npm install && echo "Install Done."
 # 构建项目，增加 Node.js 内存限制
 RUN set -x \
-    && node --max-old-space-size=1024 ./node_modules/.bin/vite build \
+    && node --max-old-space-size=2048 ./node_modules/.bin/vite build \
     && echo "Build Done."
 
 # 第二阶段
