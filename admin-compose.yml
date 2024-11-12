@@ -1,4 +1,6 @@
 # docker-compose -f admin-compose.yml up -d
+# 强制还原重建
+# docker-compose -f admin-compose.yml up -d --force-recreate 
 
 version: '3'
 
