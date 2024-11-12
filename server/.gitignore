@@ -11,5 +11,5 @@ run/
 *.un~
 .tsbuildinfo
 .tsbuildinfo.*
-# download/*
+download/*
 prisma/dev.db
