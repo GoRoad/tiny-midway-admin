@@ -98,8 +98,13 @@ const main = async () => {
   // 业务示例Demo
   parent = await insertSql('resource', resourceKeys, Array.of<any>('业务示例', 'Demo', 'MENU', null, null, null, 'i-fe:grid', null, '', null, null, null, 1, 1, 1, 1729182885385, 1729182885385), 0);
   await insertSql('resource', resourceKeys, Array.of<any>('图片上传', 'ImgUpload', 'MENU', parent.id, '/demo/upload', null, 'i-fe:image', '/src/views/demo/upload/index.vue', '', 1, null, null, 1, 1, 0, 1729182922104, 1729182922104));
-  await insertSql('resource', resourceKeys, Array.of<any>('CRUD表单', 'CrudDemo', 'MENU', parent.id, '/demo/crud', null, 'i-fe:database', '/src/views/demo/crud/index.vue', '', 1, null, null, 1, 1, 0, 1729182922104, 1729182922104));
+  let crudItem = await insertSql('resource', resourceKeys, Array.of<any>('CRUD表单', 'CrudDemo', 'MENU', parent.id, '/demo/crud', null, 'i-fe:database', '/src/views/demo/crud/index.vue', '', 1, null, null, 1, 1, 0, 1729182922104, 1729182922104), 0);
   await insertSql('resource', resourceKeys, Array.of<any>('富文本', 'DemoRichText', 'MENU', parent.id, '/demo/rich-text', null, 'i-fe:database', '/src/views/demo/rich-text/index.vue', '', 1, null, null, 1, 1, 0, 1729182922104, 1729182922104));
+  // crud例子-权限按钮
+  await insertSql('resource', resourceKeys, Array.of<any>('添加', 'demo:crud:add', 'BUTTON', crudItem!.id, null, null, null, null, '', null, null, null, 1, 1, 0, 1729218654933, 1729218654933));
+  await insertSql('resource', resourceKeys, Array.of<any>('删除', 'demo:crud:remove', 'BUTTON', crudItem!.id, null, null, null, null, '', null, null, null, 1, 1, 0, 1729218654933, 1729218654933));
+  await insertSql('resource', resourceKeys, Array.of<any>('查看', 'demo:crud:view', 'BUTTON', crudItem!.id, null, null, null, null, '', null, null, null, 1, 1, 0, 1729218654933, 1729218654933));
+  await insertSql('resource', resourceKeys, Array.of<any>('编辑', 'demo:crud:edit', 'BUTTON', crudItem!.id, null, null, null, null, '', null, null, null, 1, 1, 0, 1729218654933, 1729218654933));
   // 数据管理
   parent = await insertSql('resource', resourceKeys, Array.of<any>('数据管理', 'Data', 'MENU', null, null, null, 'i-fe:grid', null, '', null, null, null, 1, 1, 1, 1729182885385, 1729182885385), 0);
   await insertSql('resource', resourceKeys, Array.of<any>('数据字典', 'DataDict', 'MENU', parent.id, '/data/dict', null, 'i-fe:book', '/src/views/data/dict/index.vue', '', 1, null, null, 1, 1, 0, 1729182922104, 1729182922104));
@@ -109,14 +114,35 @@ const main = async () => {
   await insertSql('resource', resourceKeys, Array.of<any>('资源管理', 'ResourceMgt', 'MENU', parent.id, '/system/resource', null, 'i-fe:list', '/src/views/system/resource/index.vue', '', null, null, null, 1, 1, 0, 1729218241039, 1729218241039));
   await insertSql('resource', resourceKeys, Array.of<any>('角色管理', 'RoleMgt', 'MENU', parent.id, '/system/role', null, 'i-fe:user-check', '/src/views/system/role/index.vue', '', null, null, null, 1, 1, 1, 1729218286003, 1729218286003));
   parent = await insertSql('resource', resourceKeys, Array.of<any>('用户管理', 'UserMgt', 'MENU', parent.id, '/system/user', null, 'i-fe:users', '/src/views/system/user/index.vue', '', null, null, null, 1, 1, 2, 1729218355262, 1729218355262), 0);
-  // 角色管理下面添加一个按钮
-  await insertSql('resource', resourceKeys, Array.of<any>('删除', 'UserBtnDel', 'BUTTON', parent.id, null, null, null, null, '', null, null, null, 1, 1, 0, 1729218654933, 1729218654933));
   // 插入个人资料菜单
   await insertSql('resource', resourceKeys, Array.of<any>('个人资料', 'UserProfile', 'MENU', null, '/profile', null, 'i-fe:user', '/src/views/profile/index.vue', '', null, null, null, 0, 1, 3, 1729218405995, 1729218405995));
 
   // 插入admin角色资源权限
   const casinbKeys = ["ptype", "v0", "v1", "v2", "v3", "v4", "v5"];
-  const acessCodes= ['Base', 'Icon', 'BaseComponents', 'Unocss', 'KeepAlive', 'TestModal', 'Demo', 'ImgUpload', 'CrudDemo', 'DemoRichText', 'Data', 'DataDict', 'DataFile', 'SysMgt', 'ResourceMgt', 'RoleMgt', 'UserMgt', 'UserBtnDel', 'UserProfile'];
+  const acessCodes= [
+    'Base',
+    'Icon', 
+    'BaseComponents', 
+    'Unocss', 
+    'KeepAlive', 
+    'TestModal', 
+    'Demo', 
+    'ImgUpload', 
+    'CrudDemo', 
+    'DemoRichText', 
+    'Data', 
+    'DataDict', 
+    'DataFile', 
+    'SysMgt', 
+    'ResourceMgt', 
+    'RoleMgt', 
+    'UserMgt', 
+    'UserProfile',
+    'demo:crud:add', 
+    'demo:crud:remove', 
+    'demo:crud:edit', 
+    'demo:crud:view',
+  ];
   for (const code of acessCodes) {
     await insertSql('casbin_rule', casinbKeys, Array.of<any>('p', ADMIN_ROLE_NAME, code, 'access', null, null, null));
   }
