@@ -167,13 +167,11 @@ const main = async () => {
   });
 
   // 示例数据
-  await prisma.demo.create({
-    data: {
-      name: '性别',
-      gender: 1,
-      desc: '这是一个例子'
-    },
-  });
+  const demoKeys = ["name", "gender", "desc", "createTime", "updateTime"];
+  for (let i = 0; i < 25; i++) {
+    await insertSql('demo', demoKeys, Array.of<any>('例子' + i, 1, '这是一个例子', 1729218405995, 1729218405995));
+  }
+ 
   console.log('Seeding finished.');
 };
 main()
