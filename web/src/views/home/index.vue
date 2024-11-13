@@ -27,38 +27,40 @@
           —— 查尔斯·史考伯
         </p>
       </n-card>
-      <n-card class="ml-12 w-70%" title="✨ 欢迎使用 Vue Naive Admin 2.0">
+      <n-card class="ml-12 w-70%" title="✨ 欢迎使用 Tiny-Midway-Admin">
         <template #header-extra>
           <a
             class="text-14 text-primary text-highlight hover:underline hover:opacity-80"
-            href="https://isme.top"
+            href="#"
             target="_blank"
-            @click.prevent="message?.info('官网正在火速开发中...')"
+            @click.prevent="message?.info('来都来了帮忙点个Star呗...')"
           >
-            isme.top
+          {{ version }}
           </a>
         </template>
 
+        <p class="opacity-60">基于如下项目修改开发</p>
         <p class="opacity-60">
-          这是一款极简风格的后台管理模板，包含前后端解决方案，前端使用 Vite + Vue3 + Pinia +
-          Unocss，后端使用 Nestjs + TypeOrm +
-          MySql，简单易用，赏心悦目，历经十几次重构和细节打磨，诚意满满！！
+          ⚡ 感谢 <a class="text-orange" href="https://github.com/zclzone/vue-naive-admin/tree/2.x" target="_blank">vue-naive-admin</a> 的开源
+        </p>
+        <p class="opacity-60">
+          ⚡ 感谢 <a class="text-orange" href="https://github.com/midwayjs/midway" target="_blank">midway-js</a> 的开源
         </p>
         <footer class="mt-12 flex items-center justify-end">
           <n-button
             type="primary"
             ghost
             tag="a"
-            href="https://isme.top"
+            href="https://github.com/34892002/tiny-midway-admin/blob/main/README.md"
             target="__blank"
           >
-            开发文档
+            Readme
           </n-button>
           <n-button
             type="primary"
             class="ml-12"
             tag="a"
-            href="https://github.com/zclzone/vue-naive-admin/tree/2.x"
+            href="https://github.com/34892002/tiny-midway-admin"
             target="__blank"
           >
             代码仓库
@@ -74,68 +76,65 @@
 
         <ul class="opacity-90">
           <li class="py-4">
-            🆒 使用
-            <b>Vue3</b>
-            主流技术栈:
-            <span class="text-highlight">Vite + Vue3 + Pinia</span>
+            🚀 后端
+            <b>MidwayJs</b>
+            技术栈:
+            <span class="text-highlight">Prisma + Casbin + TypeScript</span>
           </li>
           <li class="py-4">
-            🍇 使用
-            <b>原子CSS</b>
-            框架:
-            <span class="text-highlight">Unocss</span>
-            ，优雅、轻量、易用
+            🔐 基于 Casbin，
+            <span class="text-highlight">菜单、接口、按钮</span>
+            ，全部可控，RBAC模型权限管理
           </li>
           <li class="py-4">
-            🤹 使用主流的
-            <span class="text-highlight">iconify + unocss</span>
-            图标方案，支持自定义图标，支持动态渲染
+            👏 使用 Prisma，
+            <span class="text-highlight">框架支持</span>
+            PostgreSQL、MySQL、SQLite、MongoDB、SQLServer、CockroachDB
           </li>
           <li class="py-4">
-            🎨 使用 Naive UI，
-            <span class="text-highlight">极致简洁的代码风格和清爽的页面设计</span>
-            ，审美在线，主题轻松定制
+            ⚡️ 封装 Crud
+            ，五分钟
+            <span class="text-highlight">增</span>、
+            <span class="text-highlight">删</span>、
+            <span class="text-highlight">改</span>、
+            <span class="text-highlight">查</span>、
+            接口全搞定
           </li>
           <li class="py-4">
-            👏 先进且易于理解的文件结构设计，多个模块之间
-            <b>零耦合</b>
-            ，单个业务模块删除不影响其他模块
-          </li>
-          <li class="py-4">
-            🚀
-            <span class="text-highlight">扁平化路由</span>
-            设计，每一个组件都可以是一个页面，告别多级路由 KeepAlive 难实现问题
-          </li>
-
-          <li class="py-4">
-            🍒
-            <span class="text-highlight">基于权限动态生成路由</span>
-            ，无需额外定义路由，
-            <span class="text-highlight">403和404可区分</span>
-            ，而不是无权限也跳404
-          </li>
-          <li class="py-4">
-            🔐 基于Redis集成
+            ✨ 支持 Refresh Token，
             <span class="text-highlight">无感刷新</span>
             ，用户登录态可控，安全与体验缺一不可
           </li>
+          <br>
           <li class="py-4">
-            ✨ 基于 Naive UI 封装
-            <span class="text-highlight">message</span>
-            全局工具方法，支持批量提醒，支持跨页面共享实例
+            🆒 前端
+            <b>Vue3</b>
+            技术栈:
+            <span class="text-highlight">Vite + Pinia + Naive UI</span>
           </li>
           <li class="py-4">
-            ⚡️ 基于 Naive UI 封装常用的业务组件，包含
-            <span class="text-highlight">Page</span>
-            组件、
+            🍇 使用
+            <b>iconify + unocss</b>
+            框架:
+            <span class="text-highlight">Unocss</span>
+            ，优雅、轻量、易用，图标支持自定义，支持动态渲染
+          </li>
+          <li class="py-4">
+            ⚡️ 基于 Fast-Crud
+            ，集成
             <span class="text-highlight">CRUD</span>
-            表格组件及
-            <span class="text-highlight">Modal</span>
-            组件，减少大量重复性工作
+            表格、分页查询标准组件，包含
+            <span class="text-highlight">富文本</span>、
+            <span class="text-highlight">JSON</span>、
+            <span class="text-highlight">上传</span>
+            等业务组件，支持COS、OSS、本地上传模式，助力快速开发
+          </li>
+          <li class="py-4">
+            🎨 <span class="text-highlight">扁平化路由</span> 设计，每一个组件都可以是一个页面，告别多级路由 KeepAlive 难实现问题
           </li>
         </ul>
 
-        <n-divider class="mb-0! mt-12!">
+        <!-- <n-divider class="mb-0! mt-12!">
           <p class="text-14 opacity-60">
             👉点击
             <b class="mx-2 transition hover:text-primary">
@@ -143,7 +142,7 @@
             </b>
             查看更多实用功能，持续开发中...
           </p>
-        </n-divider>
+        </n-divider> -->
       </n-card>
 
       <n-card class="ml-12 w-50%" title="🛠️ 技术栈" segmented>
@@ -168,6 +167,7 @@ import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
 
+const version = import.meta.env.VITE_VERSION
 const userStore = useUserStore()
 
 echarts.use([
