@@ -29,7 +29,7 @@ export class RoleService {
     if (!policys?.length) throw new MidwayError('权限标识列表不能为空', '5002');
     if (!policys.every(item => item)) throw new MidwayError('权限标识不能为空', '5002');
     // 不能以数字开头，只能包含大小写英文字母、数字和下划线
-    const regex = /^(?!^\d)[a-zA-Z0-9_\/]+$/;
+    const regex = /^(?!^\d)[a-zA-Z0-9_\:]+$/;
     policys.forEach(item => {
       if (!regex.test(item)) throw new MidwayError(`权限标识 ${item} 不符合规则`, '5002');
     });

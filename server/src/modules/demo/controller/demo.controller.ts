@@ -10,9 +10,23 @@ import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
   '/demo/crud',
   { middleware: [JwtPassportMiddleware], description: 'CRUD例子' },
   {
-    apis: ['list', 'page', 'info', 'create', 'update', 'delete'],
+    apis: [
+      'list',
+      'page',
+      'info',
+      'create',
+      'update',
+      'delete'
+    ],
+    access: [
+      'demo:crud:view',
+      'demo:crud:view',
+      'demo:crud:view',
+      'demo:crud:add',
+      'demo:crud:edit',
+      'demo:crud:remove'
+    ],
     dto: { create: DemoDto, update: DemoDto },
-    access: ['CrudDemo', 'CrudDemo', 'CrudDemo', 'CrudDemo', 'CrudDemo', 'CrudDemo'],
     guard: CasbinGuard
   }
 )

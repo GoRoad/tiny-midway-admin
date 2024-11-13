@@ -1,6 +1,6 @@
 import { request } from '@/utils'
-import { dict } from '@fast-crud/fast-crud';
-import { formatDate } from '@/utils'
+import { dict } from '@fast-crud/fast-crud'
+import { formatDate, createPermissionOpt } from '@/utils'
 /**
  * 接口配置
  */
@@ -36,7 +36,7 @@ export const addRequest = async ({ form }) => {
  * 定义一个CrudOptions生成器方法
  */
 export default function ({ crudExpose, context }) {
-  return {
+  const opt = {
     crudOptions: {
       // 在这里自定义你的crudOptions配置
       request: {
@@ -151,5 +151,7 @@ export default function ({ crudExpose, context }) {
         }
       }
     }
-  };
+  }
+  // 按钮权限处理
+  return createPermissionOpt(opt, context)
 }
