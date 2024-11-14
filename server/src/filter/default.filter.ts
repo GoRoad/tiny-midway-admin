@@ -9,7 +9,7 @@ export class DefaultErrorFilter {
     // 把code转换成数字类型
     const code2 = +code;
     const msg = err.message;
-    console.log('@统一异常捕获处理: ', code, msg);
+    console.log('@统一异常捕获处理: ', err);
     // 不拦截下面的code，前端有特殊处理
     const ignore = [401, 403, 500];
     if (ignore.includes(code2)) {

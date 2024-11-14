@@ -113,7 +113,7 @@ model Role {
 model Resource {
   id          Int      @id @default(autoincrement())
   name        String
-  code        String
+  code        String   @unique
   type        String   @default("MENU")
   parentId    Int?     @map("parent_id")
   path        String?

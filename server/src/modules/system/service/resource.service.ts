@@ -58,38 +58,72 @@ export class ResourceService {
   }
 
   async createMenu(data: any) {
-    // 事务操作
-
-    return this.prisma.resource.create({
-      data,
-    });
+    try {
+      const res = await this.prisma.resource.create({
+        data,
+      });
+      return res;
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new Error(`编码 ${data.code} 已经存在，请重新输入！`);
+      }
+      throw error;
+    }
   }
 
   async updateMenu(id: number, data: any) {
-    // 过滤code，不允许修改，防止跟权限表对不上
-    delete data.code;
-    return this.prisma.resource.update({
+    // 查询是否修改了编码
+    const oldResource = await this.prisma.resource.findUnique({
       where: { id },
-      data,
     });
+    if (oldResource.code !== data.code) {
+      // 使用事务处理
+      const item = await this.prisma.$transaction(async client => {
+        // 清空旧的权限编码，让用户重新绑定权限
+        await client.casbinRule.deleteMany({
+          where: { ptype: 'p', v1: oldResource.code }
+        });
+        // 更新菜单
+        return await client.resource.update({
+          where: { id },
+          data,
+        });
+      });
+      // 更新casbin缓存
+      await this.casbinService.enforcer.loadPolicy();
+      return item;
+    } else {
+      return this.prisma.resource.update({
+        where: { id },
+        data,
+      });
+    }
   }
 
   async deleteMenu(id: number) {
     // 判断是否有子菜单
-    const children = await this.prisma.resource.findMany({
+    const count = await this.prisma.resource.count({
       where: { parentId: id },
     });
     // 如果有子菜单，则不能删除
-    if (children.length > 0) {
+    if (count) {
       throw new Error('该菜单下有子菜单&按钮，请先删除子菜单&按钮!');
     }
     // 删除权限
     const resource = await this.prisma.resource.findUnique({
       where: { id },
     });
-    await this.casbinService.clearDBRulesByV1('p', resource.code);
-    return this.prisma.resource.delete({
-      where: { id },
+    // 使用事务处理
+    await this.prisma.$transaction(async client => {
+      await client.casbinRule.deleteMany({
+        where: { ptype: 'p', v1: resource.code }
+      });
+      await client.resource.delete({
+        where: { id }
+      });
     });
+    // 更新casbin缓存
+    await this.casbinService.enforcer.loadPolicy();
+    return true;
   }
 }

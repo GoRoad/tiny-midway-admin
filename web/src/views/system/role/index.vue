@@ -5,8 +5,8 @@
         <!-- {{ scope }} -->
         <n-tree-select
             multiple
-            cascade
             checkable
+            default-expand-all
             label-field="name"
             key-field="code"
             check-strategy="all"

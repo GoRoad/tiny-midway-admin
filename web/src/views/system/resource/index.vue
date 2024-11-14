@@ -115,6 +115,7 @@ initData().then(() => {
 
 const modalRef = ref(null)
 function handleEdit(item = {}) {
+  // 菜单编辑
   modalRef.value?.handleOpen({
     action: 'edit',
     title: `编辑菜单 - ${item.name}`,
@@ -241,6 +242,7 @@ function handleAddBtn() {
 }
 
 function handleEditBtn(row) {
+  // 编辑按钮
   modalRef.value?.handleOpen({
     action: 'edit',
     title: `编辑按钮 - ${row.name}`,

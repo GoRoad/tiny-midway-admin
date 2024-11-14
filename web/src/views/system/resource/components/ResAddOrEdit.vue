@@ -200,20 +200,23 @@ const defaultForm = { enable: true, show: true, layout: '' }
 const [modalFormRef, modalForm, validation] = useForm()
 const [modalRef, okLoading] = useModal()
 
+let rawCode = ''
 const modalAction = ref('')
 const parentIdDisabled = ref(false)
 function handleOpen(options = {}) {
+  console.log('options: ', options);
   const { action, row = {}, ...rest } = options
   modalAction.value = action
   modalForm.value = { ...defaultForm, ...row }
+  rawCode = row.code
   parentIdDisabled.value = !!row.parentId && row.type === 'BUTTON'
   modalRef.value.open({ ...rest, onOk: onSave })
 }
 
 async function onSave() {
-  await validation()
-  okLoading.value = true
-  try {
+  // 具体修改流程
+  const handleUpdate = async () => {
+    okLoading.value = true
     let newFormData
     if (!modalForm.value.parentId)
       modalForm.value.parentId = null
@@ -227,6 +230,24 @@ async function onSave() {
     okLoading.value = false
     $message.success('保存成功')
     emit('refresh', modalAction.value === 'add' ? newFormData : modalForm.value)
+  }
+  // 校验
+  await validation()
+  // 给出修改提示
+  try {
+    return new Promise((resolve, reject) => {
+      if (modalForm.value.code != rawCode) {
+        $dialog.confirm({
+          type: 'info',
+          title: `修改编码将导致权限失效，需要您重新给角色分配权限，是否继续？`,
+          confirm() {
+            handleUpdate().then(resolve)
+          }
+        })
+      } else {
+        handleUpdate().then(resolve)
+      }
+    })
   }
   catch (error) {
     console.error(error)
