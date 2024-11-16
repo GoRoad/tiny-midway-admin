@@ -21,6 +21,9 @@ export class DictService {
   async getMenuDict() {
     // 获取所有菜单项
     const menus = await this.prisma.resource.findMany({
+      where: {
+        enable: true
+      },
       orderBy: {
         order: 'asc',
       },

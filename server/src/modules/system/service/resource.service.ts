@@ -72,11 +72,14 @@ export class ResourceService {
   }
 
   async updateMenu(id: number, data: any) {
-    // 查询是否修改了编码
+    // 取原来的资源数据
     const oldResource = await this.prisma.resource.findUnique({
       where: { id },
     });
-    if (oldResource.code !== data.code) {
+    // 是否修改权限
+    const changePermission = ('code' in data && oldResource.code !== data.code) || ('enable' in data && oldResource.enable && !data.enable)
+    // 修改code
+    if (changePermission) {
       // 使用事务处理
       const item = await this.prisma.$transaction(async client => {
         // 清空旧的权限编码，让用户重新绑定权限

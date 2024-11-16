@@ -149,11 +149,9 @@ const findParent = (menus, parentId) => {
 }
 
 const getButtons = ({ parentId }) => {
-  console.log('@getButtons-parentId: ', parentId);
   const _parent = findParent(treeRaw, parentId)
   const parent = _.cloneDeep(_parent)
   const btns = parent?.children || []
-  console.log('btns: ', btns);
   return {
     code: 0,
     message: 'OK',
@@ -175,7 +173,18 @@ const btnsColumns = [
           rubberBand: false,
           value: row.enable,
           loading: !!row.enableLoading,
-          onUpdateValue: () => handleEnable(row),
+          onUpdateValue: () => {
+            const title = row.enable 
+              ? '禁用按钮清除所有角色的对应的权限，是否继续？'
+              : '启用按钮需要您重新给角色分配对应权限，是否继续？'
+            $dialog.confirm({
+              type: 'info',
+              title,
+              confirm() {
+                handleEnable(row)
+              }
+            })
+          },
         },
         {
           checked: () => '启用',
@@ -263,7 +272,6 @@ function handleDeleteBtn(item) {
         await api.deletePermission(item.id)
         $message.success('删除成功')
         initData(item)
-        $table.value.handleSearch()
         d.loading = false
       }
       catch (error) {
@@ -281,7 +289,7 @@ async function handleEnable(item) {
       enable: !item.enable,
     })
     $message.success('操作成功')
-    $table.value?.handleSearch()
+    initData(item)
     item.enableLoading = false
   }
   catch (error) {
