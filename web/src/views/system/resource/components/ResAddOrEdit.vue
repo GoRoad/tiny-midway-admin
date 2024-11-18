@@ -236,10 +236,11 @@ async function onSave() {
   // 给出修改提示
   try {
     return new Promise((resolve, reject) => {
-      if (modalForm.value.code != rawCode) {
+      const changePermission = modalForm.value.code != rawCode || modalForm.value.enable === false
+      if (modalAction.value === 'edit' && changePermission) {
         $dialog.confirm({
           type: 'info',
-          title: `修改编码将导致权限失效，需要您重新给角色分配权限，是否继续？`,
+          title: `该操作将导致权限失效，需要您重新给角色分配权限，是否继续？`,
           confirm() {
             handleUpdate().then(resolve)
           }
