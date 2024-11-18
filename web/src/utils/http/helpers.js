@@ -19,15 +19,16 @@ export function resolveResError(code, message, needTip = true) {
       $dialog.confirm({
         title: '提示',
         type: 'info',
-        content: '登录已过期，是否重新登录？',
+        closable: false,
+        closeOnEsc: false,
+        maskClosable: false,
+        negativeText: '',
+        content: '登录已过期，请重新登录。',
         confirm() {
           useAuthStore().logout()
           window.$message?.success('已退出登录')
           isConfirming = false
-        },
-        cancel() {
-          isConfirming = false
-        },
+        }
       })
       return false
     case 11007:

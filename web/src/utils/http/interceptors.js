@@ -109,7 +109,7 @@ async function resReject(error) {
   }
 
   const { data, status, config } = error.response
-  const code = +data?.code ?? status
+  const code = +data?.code || status
 
   const needTip = config?.needTip !== false
   const message = resolveResError(code, data?.message ?? error.message, needTip)
