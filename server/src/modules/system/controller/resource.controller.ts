@@ -4,6 +4,7 @@ import { ResourceService } from '../service/resource.service';
 import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
 import { Access } from '../../../decorator/access';
 import { CasbinGuard } from '../../../guard/casbin';
+import { MidwayError } from '@midwayjs/core';
 
 @UseGuard(CasbinGuard)
 @Controller('/system/resource', { middleware: [JwtPassportMiddleware] })
@@ -44,6 +45,9 @@ export class ResourceController {
   @Access('ResourceMgt')
   @Del('/:id')
   async deleteMenu(@Param('id') id: string) {
+    if (process.env.RUN_DEMO === 'true') {
+      throw new MidwayError('演示环境下不能删除菜单', '5005');
+    }
     const menus = await this.resourceService.deleteMenu(+id);
     return menus;
   }

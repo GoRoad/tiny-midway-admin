@@ -1,6 +1,7 @@
 import { UseGuard, Post, Del, Put, Inject, Controller, Body, Param } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
+import { MidwayError } from '@midwayjs/core';
 
 import { UserService } from '../service/user.service';
 import { Access } from '../../../decorator/access';
@@ -46,6 +47,9 @@ export class RoleController {
     @Param('id') id: string,
     @Body() obj: any,
   ) {
+    if (process.env.RUN_DEMO === 'true') {
+      if (obj.system) { throw new MidwayError('演示环境不能修改Root用户', '5005') };
+    }
     return await this.userService.updateOne(Number(id), obj);
   }
 
