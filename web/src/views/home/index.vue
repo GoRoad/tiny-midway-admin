@@ -21,10 +21,10 @@
         </div>
 
         <p class="mt-28 text-14 opacity-60">
-          一个人几乎可以在任何他怀有无限热忱的事情上成功。
+          root用户【超级管理员】无需授权，本身拥有最高权限
         </p>
         <p class="mt-12 text-right text-12 opacity-40">
-          —— 查尔斯·史考伯
+          注：框架使用带root权限的RBAC模型
         </p>
       </n-card>
       <n-card class="ml-12 w-70%" title="✨ 欢迎使用 Tiny-Midway-Admin">

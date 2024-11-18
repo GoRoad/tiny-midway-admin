@@ -32,7 +32,8 @@ export class AuthController {
       login.captchaId,
       login.captcha
     );
-    if (!login.isQuick && !capPassed) {
+    const isDemo = process.env.RUN_DEMO === 'true';
+    if (!capPassed && !isDemo) {
       // 业务逻辑的错误，不用抛出框架错误，
       // throw new WEBError();
       return AdminErrorEnum.CAPTCHA_ERROR;
