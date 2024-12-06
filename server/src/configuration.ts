@@ -40,6 +40,8 @@ export class MainConfiguration {
   app: koa.Application;
 
   async onReady(applicationContext: IMidwayContainer) {
+    console.log('Home:', process.env.HOME);
+    console.log('数据库URL:', process.env.DATABASE_URL);
     // 全局格式处理中间件
     this.app.useMiddleware([ReportMiddleware]);
     // 全局错误处理过滤器
