@@ -4,6 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "@langchain/openai": "^0.3.14",
     "@midwayjs/bootstrap": "^3.18.2",
     "@midwayjs/busboy": "^3.18.2",
     "@midwayjs/captcha": "^3.18.2",
@@ -20,6 +21,7 @@
     "bcrypt": "^5.1.1",
     "casbin": "^5.31.0",
     "casbin-prisma-adapter": "^1.5.0",
+    "langchain": "^0.3.6",
     "lodash": "^4.17.21",
     "passport-jwt": "^4.0.1"
   },

@@ -183,3 +183,18 @@ model File {
 
   @@map("file")
 }
+
+model AIModelConfig {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  type        String
+  apiKey      String
+  model       String
+  temperature Float?
+  maxTokens   Int?
+  baseURL     String
+  createTime  DateTime @default(now())
+  updateTime  DateTime @updatedAt
+
+  @@map("ai_model_config")
+}

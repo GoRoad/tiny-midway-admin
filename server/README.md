@@ -4,7 +4,7 @@
 
 <!-- 在此次添加使用文档 -->
 
-如需进一步了解，参见 [midway 文档][midway]。
+如需进一步了解，参见 [midway 文档][https://midwayjs.org]。
 
 ### 本地开发
 
@@ -14,16 +14,11 @@ $ npm run dev
 $ open http://localhost:7001/
 ```
 
-### 部署
-
+### 开发用-数据库命令
 ```bash
-$ npm start
+$ npx prisma studio
+$ npx prisma migrate dev --name init
+$ npx prisma generate
+$ npx prisma db pull
+$ npx prisma db push
 ```
-
-### 内置指令
-
-- 使用 `npm run lint` 来做代码风格检查。
-- 使用 `npm test` 来执行单元测试。
-
-
-[midway]: https://midwayjs.org
