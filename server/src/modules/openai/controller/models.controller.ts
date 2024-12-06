@@ -4,13 +4,13 @@ import { Crud } from '../../../core/crud_decorator';
 import { DemoDto } from '../dto/models';
 import { AIModelService } from '../service/models.service';
 // import { CasbinGuard } from '../../../guard/casbin';
-// import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
+import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
 
 // import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
 @Crud(
   '/openai/model',
-  { middleware: [], description: '模型管理' },
+  { middleware: [JwtPassportMiddleware], description: '模型管理' },
   {
     apis: [
       'list',

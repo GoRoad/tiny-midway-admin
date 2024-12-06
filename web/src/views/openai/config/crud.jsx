@@ -1,6 +1,15 @@
 import { request } from '@/utils'
 import { dict } from '@fast-crud/fast-crud'
 import { formatDate, createPermissionOpt } from '@/utils'
+
+import { ref } from 'vue'
+import { useAuthStore } from '@/store'
+import axios from 'axios'
+
+const _loading = ref(false)
+console.log('_loading: ', _loading);
+
+const { accessToken } = useAuthStore()
 /**
  * 接口配置
  */
@@ -33,9 +42,27 @@ export const addRequest = async ({ form }) => {
 }
 
 const testAi = async (form) => {
-  const res = await request.get('/openai/model/test', { params: {modelName: form.name} })
-  $message.info(res.data || '测试失败')
-  return
+  // 不使用拦截器处理code，防止触发框架逻辑
+  // 获取完整的http信息用于判断模型接口状态
+  const url = import.meta.env.VITE_AXIOS_BASE_URL + '/openai/model/test'
+  const config = {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    params: {modelName: form.name},
+    timeout: 6000,
+  }
+  try {
+    _loading.value = true
+    const res = await axios.get(url, config)
+    const { code, data, message } = res.data
+    return $message.info(`code: ${code} data: ${data} message: ${message}`)
+  } catch (error) {
+    const { status, message } = err
+    return $message.error(`data: ${status} message: ${message}`)
+  } finally {
+    _loading.value = false
+  }
 }
 
 
@@ -103,6 +130,7 @@ export default function ({ crudExpose, context }) {
           search: { show: true },
           form: {
             value: 'openAi',
+            helper: '不限于OpenAI，使用OpenAI接口格式的模型都能兼容',
             rule: [{ required: true, message: '请选择', trigger: 'blur' }],
           },
           dict: dict({
@@ -148,6 +176,9 @@ export default function ({ crudExpose, context }) {
         temperature: {
           title: '温度',
           type: 'text',
+          form: {
+            component: { placeholder: '选填' },
+          },
           column: {
             show: false,
           }
@@ -155,19 +186,23 @@ export default function ({ crudExpose, context }) {
         maxTokens: {
           title: 'token上限',
           type: 'text',
+          form: {
+            component: { placeholder: '选填' },
+          },
           column: {
             show: false,
           }
         },
-        updateTime: {
-          title: '验证可用性',
+        _opt: {
+          title: '测试接口',
           form: { show: false },
           column: {
+            width: 100,
             render(context) {
               console.log('context scope', context.row.name);
               return (
                 <div>
-                  <n-button onClick={ () => testAi(context.row) }>测试</n-button>
+                  <n-button loading={_loading.value} onClick={() => testAi(context.row)}>测试</n-button>
                 </div>
               );
             },
