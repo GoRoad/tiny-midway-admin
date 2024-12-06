@@ -49,7 +49,7 @@ const testAi = async (form) => {
     headers: {
       Authorization: `Bearer ${accessToken}`
     },
-    params: {modelName: form.name},
+    params: {id: form.id},
     timeout: 6000,
   }
   try {

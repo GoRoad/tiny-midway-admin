@@ -1,12 +1,18 @@
-import { Controller, Get, Inject, Query } from '@midwayjs/core';
+import { Controller, UseGuard, Get, Inject, Query, Param } from '@midwayjs/core';
 import { CasbinService } from '../../base/service/casbin.service';
+import { AIModelService } from '../../openai/service/models.service';
 // import { PrismaClient } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { EnvGuard } from "../../../guard/env";
 
-@Controller('/test')
+@Controller('/test') // 只允许本地访问test接口
+@UseGuard(EnvGuard)
 export class HomeController {
   @Inject()
   casbinService: CasbinService;
+  @Inject()
+  aIModelService: AIModelService;
   @Inject()
   prisma: PrismaClient;
 
@@ -74,5 +80,16 @@ export class HomeController {
       'root', {users: ['u1'], policy: ['Menu','Base']}
     ]
     return roles;
+  }
+
+  @Get('/model/:id')
+  async publicAPI(@Param('id') id: number, @Query('q') q: string = '你用的模型？') {
+    const chat = await this.aIModelService.getOpenAIModel(id);
+    const messages = [
+      new SystemMessage('要求：中文回复，言简意赅'),
+      new HumanMessage(q),
+    ];
+    const res = await chat.invoke(messages);
+    return res.content;
   }
 }

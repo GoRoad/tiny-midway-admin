@@ -2,8 +2,7 @@ import { Inject, Provide } from '@midwayjs/core';
 import { PrismaClient, AIModelConfig } from '@prisma/client';
 import { BaseService } from '../../../core/crud_service';
 
-// import { ChatOpenAI, ChatOpenAICallOptions } from '@langchain/openai';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai';
 
 @Provide()
 export class AIModelService extends BaseService<AIModelConfig> {
@@ -14,19 +13,29 @@ export class AIModelService extends BaseService<AIModelConfig> {
     return this.prismaClient.aIModelConfig;
   }
 
-  public async test(name: string) {
-    const aiModel = await this.model.findUnique({ where: { name } });
-    const modelOptions = {
+  /**
+   * openai
+   */
+  public async getOpenAIModel(id: number) {
+    const aiModel = await this.model.findUnique({ where: { id } });
+    const modelOptions: ChatOpenAIFields = {
       apiKey: aiModel.apiKey,
       model: aiModel.model,
+      temperature: aiModel.temperature,
+      maxTokens: aiModel.maxTokens,
       configuration: {
         baseURL: aiModel.baseURL,
       },
-    } as any;
-    if (aiModel.temperature) modelOptions.temperature = aiModel.temperature;
-    if (aiModel.maxTokens) modelOptions.maxTokens = aiModel.maxTokens;
+    };
+    if (!aiModel.temperature) delete modelOptions.temperature;
+    if (!aiModel.maxTokens) delete modelOptions.maxTokens;
     const openai = new ChatOpenAI(modelOptions);
-    const res = await openai.invoke('你好')
+    return openai;
+  }
+
+  public async test(id: number) {
+    const model = await this.getOpenAIModel(id);
+    const res = await model.invoke('hi');
     return res.content;
   }
 }
