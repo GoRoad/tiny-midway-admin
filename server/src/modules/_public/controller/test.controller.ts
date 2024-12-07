@@ -5,6 +5,7 @@ import { AIModelService } from '../../openai/service/models.service';
 import { PrismaClient } from '@prisma/client';
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { EnvGuard } from "../../../guard/env";
+import * as fs from "fs";
 
 @Controller('/test') // 只允许本地访问test接口
 @UseGuard(EnvGuard)
@@ -67,7 +68,7 @@ export class HomeController {
     //     "order": 1
     //   }
     // });
-    await this.casbinService.syncAdminLoadAndSave('test', ['admin'], 'guest', ['Base','data6', 'Icon']);
+    await this.casbinService.syncAdminLoadAndSave('test', ['admin'], 'guest', ['Base', 'data6', 'Icon']);
     const access = await this.casbinService.getAdminPlocy();
     const role = await this.casbinService.getAdminGroup();
     return {
@@ -77,7 +78,7 @@ export class HomeController {
   @Get('/roles')
   async test1(): Promise<any> {
     const roles = [
-      'root', {users: ['u1'], policy: ['Menu','Base']}
+      'root', { users: ['u1'], policy: ['Menu', 'Base'] }
     ]
     return roles;
   }
@@ -88,6 +89,28 @@ export class HomeController {
     const messages = [
       new SystemMessage('要求：中文回复，言简意赅'),
       new HumanMessage(q),
+    ];
+    const res = await chat.invoke(messages);
+    return res.content;
+  }
+
+  @Get('/vision/:id')
+  async publicVisionAPI(@Param('id') id: number, @Query('q') q: string = '你用的模型？') {
+    const image = fs.readFileSync("./download/bq.jpg").toString("base64");
+    const chat = await this.aIModelService.getOpenAIModel(id);
+    const messages = [
+      new HumanMessage({
+        content: [
+          {
+            type: "text",
+            text: "描述图片内容.",
+          },
+          {
+            type: "image_url",
+            image_url: { url: `data:image/png;base64,${image}` },  // 图片base64，gemini放在image_url，千问放在image_url.url
+          },
+        ]
+      }),
     ];
     const res = await chat.invoke(messages);
     return res.content;

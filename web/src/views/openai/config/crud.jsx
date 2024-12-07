@@ -178,6 +178,9 @@ export default function ({ crudExpose, context }) {
           type: 'text',
           form: {
             component: { placeholder: '选填' },
+            valueResolve(context) {
+              context.form.temperature = +context.form.temperature
+            },
           },
           column: {
             show: false,
@@ -188,6 +191,9 @@ export default function ({ crudExpose, context }) {
           type: 'text',
           form: {
             component: { placeholder: '选填' },
+            valueResolve(context) {
+              context.form.maxTokens = +context.form.maxTokens
+            }, 
           },
           column: {
             show: false,
