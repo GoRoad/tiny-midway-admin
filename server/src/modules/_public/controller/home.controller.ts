@@ -1,4 +1,4 @@
-import { Controller, Get } from '@midwayjs/core';
+import { Controller, Get, Post, Body } from '@midwayjs/core';
 
 @Controller('/')
 export class HomeController {
@@ -16,5 +16,11 @@ export class HomeController {
       mem,
       msg
     };
+  }
+
+  @Post('/wxBot/Callback')
+  async wxBotCallback(@Body() data: any): Promise<any> {
+    console.log('data: ', data);
+    return { msg: data };
   }
 }

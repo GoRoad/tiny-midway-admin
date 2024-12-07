@@ -198,3 +198,33 @@ model AIModelConfig {
 
   @@map("ai_model_config")
 }
+
+model WxUser {
+  id         Int      @id @default(autoincrement())
+  alias      String?
+  mobile     String?
+  nickName   String?
+  headImgUrl String?
+  uin        Int?
+  status     Int // 0离线 1在线
+  wxid       String   @unique
+  appId      String // 登录设备id
+  loginAt    DateTime // 登录时间
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("wx_user")
+}
+
+model GeweConfig {
+  id        Int      @id @default(autoincrement())
+  token     String
+  baseAPI   String
+  fileAPI   String
+  tinyAPI   String
+  CheckAt   DateTime // Gewe接口验证时间
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gewe_config")
+}
