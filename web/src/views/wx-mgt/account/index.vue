@@ -153,10 +153,10 @@ const showGewe = ref(false);
 const wxLoading = ref(false);
 
 const options = ref([
-  { label: '登录', key: '1' },
-  { label: '下线', key: '2' },
-  { label: '刷新状态', key: '3' },
-  { label: '删除', key: '4' },
+  { label: '登录', key: '1', icon: renderIcon('i-ic:baseline-wechat text-18') },
+  { label: '下线', key: '2', icon: renderIcon('i-material-symbols:cloud-off-outline text-18') },
+  { label: '刷新状态', key: '3', icon: renderIcon('i-majesticons:eye-line text-18') },
+  { label: '删除', key: '4', icon: renderIcon('i-material-symbols:delete-outline text-18') },
 ])
 const loginModal = reactive({
   timer: null,
@@ -170,6 +170,14 @@ const loginModal = reactive({
 
 const geweConfig = ref({})
 const wxUsers = ref([])
+
+function renderIcon(icon) {
+  return () => {
+    return h('i', {
+      class: icon
+    })
+  }
+}
 
 const toLogin = async (item) => {
   loginModal.status = ''
