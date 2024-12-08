@@ -26,11 +26,12 @@
 </template>
 
 <script setup>
-// const props = defineProps({
-//   modelValue: Boolean,
-// });
+import api from "@/api/wxMgt";
+const props = defineProps({
+  data: Object,
+});
 // const emit = defineEmits(['update:modelValue']);
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'refresh']);
 const show = ref(true);
 const formRef = ref(null);
 
@@ -56,19 +57,21 @@ const rules = {
   },
 };
 const formValue = ref({
-  baseAPI: "http://127.0.0.1:2531/v2/api",
-  fileAPI: "http://127.0.0.1:2532/download",
-  tinyAPI: "http://127.0.0.1:7001/wxBot/Callback",
+  baseAPI: props.data?.baseAPI || "http://127.0.0.1:2531/v2/api",
+  fileAPI: props.data?.fileAPI || "http://127.0.0.1:2532/download",
+  tinyAPI: props.data?.tinyAPI || "http://127.0.0.1:7001/wxBot/Callback",
 });
 
 const submit = (e) => {
   e.preventDefault();
-  formRef.value?.validate((errors) => {
+  formRef.value?.validate(async (errors) => {
     if (!errors) {
-      $message.success("Valid");
+      await api.setConfig(formValue.value)
+      emit('refresh')
+      $message.success("设置成功!");
     } else {
       console.log(errors);
-      $message.error("Invalid");
+      $message.error("设置失败!");
     }
   });
 };
