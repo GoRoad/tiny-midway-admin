@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body } from '@midwayjs/core';
+import { Inject, Controller, Get, Post, Body } from '@midwayjs/core';
+import { WxMessageService } from '../../wxbot/service/wxMessage.service';
 
 @Controller('/')
 export class HomeController {
+  @Inject()
+  wxMessageService: WxMessageService
 
   @Get('/')
   async home(): Promise<any> {
@@ -20,7 +23,13 @@ export class HomeController {
 
   @Post('/wxBot/Callback')
   async wxBotCallback(@Body() data: any): Promise<any> {
-    console.log('data: ', data);
-    return { msg: data };
+    if (data.TypeName === 'AddMsg') {
+      await this.wxMessageService.handleMessage(data);
+    }
+    // 掉线消息
+    if (data.TypeName === 'Offline') {
+      console.log('@账号掉线', data);
+    }
+    return { success: true, message: 'OK' };
   }
 }

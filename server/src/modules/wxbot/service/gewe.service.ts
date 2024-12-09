@@ -71,6 +71,11 @@ export class GeweService {
     this.expiresAt = Date.now() + GeweService.EXPIRES_TIME;
   }
 
+  async post(url: string, data: any) {
+    const result = await this.request('POST', url, data);
+    return result;
+  }
+
   async getToken() {
     if (Date.now() >= this.expiresAt) {
       await this.refreshToken();
