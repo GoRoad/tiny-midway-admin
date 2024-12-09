@@ -1,20 +1,20 @@
-interface IMessageContent {
+interface GeweMessageContent {
   string: string;
 }
 
-interface IImgBuf {
+interface ImgBuf {
   iLen: number;
 }
 
-interface IMessageData {
+interface GeweMessageData {
   MsgId: string;
-  FromUserName: IMessageContent;
-  ToUserName: IMessageContent;
+  FromUserName: GeweMessageContent;
+  ToUserName: GeweMessageContent;
   MsgType: number;
-  Content: IMessageContent;
+  Content: GeweMessageContent;
   Status: number;
   ImgStatus: number;
-  ImgBuf: IImgBuf;
+  ImgBuf: ImgBuf;
   CreateTime: number;
   MsgSource: string;
   PushContent: string;
@@ -22,11 +22,11 @@ interface IMessageData {
   MsgSeq: number;
 }
 
-export interface IMessage {
+export interface GeweMessage {
   TypeName: string;
   Appid: string;
   Wxid: string;
-  Data: IMessageData;
+  Data: GeweMessageData;
 }
 
 // 使用示例
@@ -68,60 +68,47 @@ export interface IMessage {
 // };
 
 /* 消息类型为49的链接类消息，需要进一步解析Msg.Data.Content.string中的xml
-* 邀请进群的通知，msg.appmsg.type=5
-* 小程序消息msg.appmsg.type=33/36
-* 引用消息msg.appmsg.type=57
-* 转账消息msg.appmsg.type=2000
-* 红包消息msg.appmsg.type=2001
-* 视频号消息msg.appmsg.type=51
-* 文件消息（发送文件的通知 msg.appmsg.type=74
-* 文件消息（文件发送完成）msg.appmsg.type=6
-* 群聊邀请msg.appmsg.title=邀请你加入群聊(根据手机设置的系统语言title会有调整，不同语言关键字不同)
-*/
+ * 邀请进群的通知，msg.appmsg.type=5
+ * 小程序消息msg.appmsg.type=33/36
+ * 引用消息msg.appmsg.type=57
+ * 转账消息msg.appmsg.type=2000
+ * 红包消息msg.appmsg.type=2001
+ * 视频号消息msg.appmsg.type=51
+ * 文件消息（发送文件的通知 msg.appmsg.type=74
+ * 文件消息（文件发送完成）msg.appmsg.type=6
+ * 群聊邀请msg.appmsg.title=邀请你加入群聊(根据手机设置的系统语言title会有调整，不同语言关键字不同)
+ */
 /* 消息类型为10002的消息，需要进一步解析Msg.Data.Content.string中的xml
-* 撤回消息，sysmsg.type=revokemsg
-* 拍一拍消息 sysmsg.type=pat
-*/
-export enum IMessageType {
-  Text = 1, // 文本消息
-  Image = 3, // 图片消息
-  Voice = 34, // 语音消息
-  FriendConfirm = 37, // 好友添加请求消息
-  POSSIBLEFRIEND_MSG = 40, // POSSIBLEFRIEND_MSG
-  contactCard = 42, // 分享的名片消息
-  Video = 43, // 视频消息
-  Emoji = 47, // 表情
-  Location = 48, // 位置消息
-  Link = 49, // 链接类消息(引用消息),
-  VOIPMsg = 50, // VOIP消息
-  WeChatInit = 51, // 微信初始化消息
-  VOIPNotify = 52, // VOIP通知
-  VOIPInvite = 53, // VOIP邀请
-  ShortVideo = 62, // 小视频
-  SystemNotice = 9999, // 系统通知
-  SystemMessage = 10000, // 系统消息
-  Tips = 10002, // 贴士类消息，包含撤回、拍一拍、群（踢人、解散、公告）通知
-}
+ * 撤回消息，sysmsg.type=revokemsg
+ * 拍一拍消息 sysmsg.type=pat
+ */
 
-interface IMessagePostDataExtnd {
-  nickname: string;
-}
-
-export interface IMessageStoreData {
-  appId: string;
-  wxId: string;
-  msgId: string;
-  newMsgId: string;
-  msgType: number;
-  from: string;
-  to: string;
-  content: string;
-  documents?: any; // Unsupported("vector") is represented as 'any' in TypeScript
-  pushContent?: string;
-  createTime: Date;
-  groupId?: string;
-}
-
-export interface IMessagePostData extends IMessageStoreData {
-  extend?: IMessagePostDataExtnd;
-}
+export const MessageType = {
+  Unknown: 'unknown', // 未知类型
+  FileStart: 'file_start', // 文件开始
+  File: 'file', // 文件发送结束
+  Voice: 'voice', // 语音
+  Contact: 'contact', // 名片
+  Emoji: 'emoji', // 表情
+  Image: 'image', // 图片
+  Text: 'text', // 文本
+  Video: 'video', // 视频
+  Url: 'link', // 链接
+  RoomInvitation: 'room_invitation', // 群邀请
+  MiniApp: 'mini_app', // 小程序消息
+  AppMsg: 'app_msg', // app消息
+  Link: 'link', // 公众号链接
+  AddFriend: 'add_friend', // 添加好友通知
+  Quote: 'quote', // 引用消息
+  Transfer: 'transfer', //转账
+  RedPacket: 'red_packet', //红包
+  VideoAccount: 'video_account', // 视频号消息
+  Revoke: 'revoke', // 撤回消息
+  Pat: 'pat', // 拍一拍
+  Location: 'location', // 位置消息
+  FunctionMsg: 'function_msg', // 微信团队消息
+  NewMonmentTimeline: 'new_monment_timeline', // 朋友圈更新
+  ChatHistroy: 'chat_histroy', // 聊天记录
+  Voip: 'voip', // voip消息
+  RealTimeLocation: 'real_time_location', // 实时位置共享
+};
