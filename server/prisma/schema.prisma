@@ -213,6 +213,9 @@ model WxUser {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
+  aiBot   AIBot? @relation("AIBotWxUsers", fields: [aiBotId], references: [id])
+  aiBotId Int?
+
   @@map("wx_user")
 }
 
@@ -226,4 +229,38 @@ model GeweConfig {
   updatedAt DateTime  @updatedAt
 
   @@map("gewe_config")
+}
+
+// 智能机器人
+model AIBot {
+  id            Int      @id @default(autoincrement())
+  name          String // 智能体名称
+  description   String? // 简介，可选
+  prompt        String? // 人设与回复逻辑，可选
+  plugins       String[] @default([]) // 插件列表，默认为空数组
+  useDataSource Boolean? // 数据源权限
+  dataSource    String[] @default([]) // 可以使用的聊天记录微信id、群id
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 关联表
+  workflow Workflow[] @relation("AIBotWorkflows")
+  wx       WxUser[]   @relation("AIBotWxUsers")
+
+  @@map("ai_bot")
+}
+
+// 工作流，待用
+model Workflow {
+  id          Int      @id @default(autoincrement())
+  name        String // 工作流名称
+  description String? // 简介，可选
+  prompt      String? // 提示词
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aiBot   AIBot @relation("AIBotWorkflows", fields: [aiBotId], references: [id])
+  aiBotId Int
+
+  @@map("workflow")
 }
