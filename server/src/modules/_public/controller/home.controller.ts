@@ -1,7 +1,7 @@
 import { Inject, Controller, Get, Post, Body } from '@midwayjs/core';
-import { WxMessageService } from '../../wxbot/service/wxMessage.service';
-import { GeweMessage } from '../../wxbot/dto/IMessage';
-import { Message } from '../../wxbot/class/message.class';
+import { WxMessageService } from '../../wechat/service/wxMessage.service';
+import { GeweMessage } from '../../wechat/dto/IMessage';
+import { Message } from '../../wechat/class/message.class';
 
 @Controller('/')
 export class HomeController {

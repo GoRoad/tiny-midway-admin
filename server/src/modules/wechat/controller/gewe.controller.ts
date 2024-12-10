@@ -3,7 +3,7 @@ import { GeweService } from '../service/gewe.service';
 
 import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
 
-@Controller('/gewe', { middleware: [JwtPassportMiddleware] })
+@Controller('/wechat/gewe', { middleware: [JwtPassportMiddleware] })
 export class GeweController {
   @Inject()
   geweService: GeweService;
