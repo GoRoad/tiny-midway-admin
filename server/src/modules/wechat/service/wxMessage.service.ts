@@ -4,16 +4,15 @@ import { AIModelService } from '../../openai/service/models.service';
 
 import { Message } from '../class/message.class';
 
-// import { PrismaClient } from '@prisma/client';
-// import { ContactsResponse, ChatRoomResponse } from '../dto/WXres';
-// import { Member } from '../dto/WXres';
+import { PrismaClient } from '@prisma/client';
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
-// type OmitPrismaClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">
 @Provide()
 export class WxMessageService {
+  @Inject('prisma')
+  prisma: PrismaClient;
   @Inject()
   geweService: GeweService;
-
   @Inject()
   aIModelService: AIModelService;
 
@@ -30,19 +29,31 @@ export class WxMessageService {
   }
 
   async handleTextMsg(msg: Message) {
-    const text = msg.text()
+    const text = msg.text();
+    const aiBot = await this.prisma.aIBot.findFirst({
+      where: {
+        wx: {
+          wxid: msg.wxid,
+        },
+      },
+    });
+    const messages = [
+      new SystemMessage(aiBot.prompt),
+      new HumanMessage(text),
+    ];
+    
     if (msg.isRoom) {
       if (text.startsWith('ai ')) {
         // this.sendMsg(msg.appid, msg.fromId, '你好，我是智能助手.')
-        const llm = await this.aIModelService.getOpenAIModel(3);
-        const res = await llm.invoke(text);
-        this.sendMsg(msg.appid, msg.fromId, res.content.toString())
+        const chat = await this.aIModelService.getOpenAIModel(3);
+        const res = await chat.invoke(messages);
+        this.sendMsg(msg.appid, msg.fromId, res.content.toString());
       }
     } else if (!msg._self) {
       // this.sendMsg(msg.appid, msg.fromId, '你好，我是你的私人智能助手.')
-      const llm = await this.aIModelService.getOpenAIModel(1);
-      const res = await llm.invoke(text);
-      this.sendMsg(msg.appid, msg.fromId, res.content.toString())
+      const chat = await this.aIModelService.getOpenAIModel(1);
+      const res = await chat.invoke(messages);
+      this.sendMsg(msg.appid, msg.fromId, res.content.toString());
     }
   }
 

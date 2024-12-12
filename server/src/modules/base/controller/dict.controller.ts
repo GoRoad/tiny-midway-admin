@@ -30,4 +30,9 @@ export class DictController {
       return AdminErrorEnum.DICT_NOT_DATA;
     }
   }
+
+  @Get('/wechat/wx-user')
+  async getWxUserDict() {
+    return this.dictService.getWxUserDict()
+  }
 }

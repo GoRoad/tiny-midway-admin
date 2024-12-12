@@ -80,8 +80,44 @@ export default function ({ crudExpose, context }) {
             col: { span: 14 },
           },
           column: {
-            width: 100,
+            width: 120,
           },
+        },
+        wxid: {
+          title: '绑定微信',
+          search: {
+            show: true,
+            rules: null,
+          },
+          type: 'dict-select',
+          dict: dict({
+            url: '/base/dict/wechat/wx-user',
+          }),
+          form: {
+            rule: [{ required: true, message: '请选择一个微信号' }],
+            col: { span: 14 },
+          },
+          column: {
+            width: 160,
+          }
+        },
+        workflowId: {
+          title: "工作流",
+          search: {
+            show: true,
+            rules: null,
+          },
+          type: 'dict-select',
+          dict: dict({
+            // url: '/base/dict/wechat/wx-user1',
+          }),
+          form: {
+            // rule: [{ required: true, message: '请选择一个工作流' }],
+            col: { span: 14 },
+          },
+          column: {
+            show: false
+          }
         },
         description: {
           title: "简介",
@@ -91,7 +127,6 @@ export default function ({ crudExpose, context }) {
             col: { span: 14 },
           },
           column: {
-            width: 380,
             ellipsis: true,
           },
         },
@@ -103,7 +138,7 @@ export default function ({ crudExpose, context }) {
             col: { span: 14 },
           },
           column: {
-            show: true,
+            show: false,
             ellipsis: true,
           },
         },
@@ -130,7 +165,7 @@ export default function ({ crudExpose, context }) {
               { value: false, label: '关闭' },
             ],
           }),
-          column: { width: 120, }
+          column: { width: 100, }
         },
         dataSource: {
           title: "数据来源",
@@ -140,7 +175,8 @@ export default function ({ crudExpose, context }) {
             col: { span: 14 },
           },
           column: {
-            show: false,
+            show: true,
+            width: 160,
           },
         },
         createdAt: {
@@ -174,14 +210,6 @@ export default function ({ crudExpose, context }) {
         // 关联表字段的处理
         workflow: {
           title: "工作流",
-          type: "text",
-          form: { show: false },
-          column: {
-            show: false,
-          },
-        },
-        wx: {
-          title: "绑定微信",
           type: "text",
           form: { show: false },
           column: {

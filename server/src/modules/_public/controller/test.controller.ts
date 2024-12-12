@@ -85,9 +85,10 @@ export class HomeController {
 
   @Get('/model/:id')
   async publicAPI(@Param('id') id: number, @Query('q') q: string = '你用的模型？') {
+    // const prompt = await this.prisma.aIBot.findFirst({where:{name: ''}})
     const chat = await this.aIModelService.getOpenAIModel(id);
     const messages = [
-      new SystemMessage('要求：中文回复，言简意赅'),
+      new SystemMessage('prompt.prompt'),
       new HumanMessage(q),
     ];
     const res = await chat.invoke(messages);

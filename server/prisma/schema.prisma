@@ -213,8 +213,7 @@ model WxUser {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  aiBot   AIBot? @relation("AIBotWxUsers", fields: [aiBotId], references: [id])
-  aiBotId Int?
+  aiBot AIBot[] @relation("AIBotWxUsers")
 
   @@map("wx_user")
 }
@@ -244,8 +243,10 @@ model AIBot {
   updatedAt     DateTime @updatedAt
 
   // 关联表
-  workflow Workflow[] @relation("AIBotWorkflows")
-  wx       WxUser[]   @relation("AIBotWxUsers")
+  workflow   Workflow? @relation("AIBotWorkflows", fields: [workflowId], references: [id])
+  workflowId Int?
+  wx         WxUser?   @relation("AIBotWxUsers", fields: [wxid], references: [id])
+  wxid       Int?
 
   @@map("ai_bot")
 }
@@ -259,8 +260,7 @@ model Workflow {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  aiBot   AIBot @relation("AIBotWorkflows", fields: [aiBotId], references: [id])
-  aiBotId Int
+  aiBot AIBot[] @relation("AIBotWorkflows")
 
   @@map("workflow")
 }
