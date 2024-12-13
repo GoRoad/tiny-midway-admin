@@ -106,16 +106,16 @@ export class GeweService {
 
   async setWxUser(data: Prisma.WxUserCreateInput) {
     const res = await this.prisma.wxUser.upsert({
-      where: { wxid: data.wxid },
+      where: { wxId: data.wxId },
       update: data,
       create: { ...data },
     });
     return res;
   }
 
-  async delWxUser(wxid: string) {
+  async delWxUser(wxId: string) {
     const data =  await this.prisma.wxUser.delete({
-      where: { wxid }
+      where: { wxId }
     })
     return data;
   }

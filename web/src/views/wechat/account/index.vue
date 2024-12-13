@@ -86,7 +86,7 @@
                 <tr>
                   <th width="160">昵称</th>
                   <th width="160">微信号</th>
-                  <th width="200">wxid</th>
+                  <th width="200">wxId</th>
                   <th width="220">登录设备</th>
                   <th width="60">状态</th>
                   <th width="160">登录时间</th>
@@ -97,7 +97,7 @@
                 <tr v-for="item in wxUsers">
                   <td>{{ item.nickName }}</td>
                   <td>{{ item.alias }}</td>
-                  <td>{{ item.wxid }}</td>
+                  <td>{{ item.wxId }}</td>
                   <td>{{ item.appId }}</td>
                   <td>{{ item.status == 1 ? '在线' : '离线' }}</td>
                   <td>{{ item.loginAt ? dayjs(item.loginAt).format('YYYY-MM-DD HH:mm') : '' }}</td>

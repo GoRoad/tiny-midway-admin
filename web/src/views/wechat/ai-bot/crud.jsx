@@ -83,7 +83,7 @@ export default function ({ crudExpose, context }) {
             width: 120,
           },
         },
-        wxid: {
+        wxId: {
           title: '绑定微信',
           search: {
             show: true,

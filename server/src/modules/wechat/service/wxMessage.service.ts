@@ -33,7 +33,7 @@ export class WxMessageService {
     const aiBot = await this.prisma.aIBot.findFirst({
       where: {
         wx: {
-          wxid: msg.wxid,
+          wxId: msg.wxid,
         },
       },
     });
