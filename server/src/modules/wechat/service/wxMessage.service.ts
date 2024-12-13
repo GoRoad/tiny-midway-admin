@@ -98,10 +98,27 @@ export class WxMessageService {
           return await client.wxMessage.create({ data });
         });
         console.log('@入库成功: ', store.pushContent);
+        const res = await this.addEmbeddingText(store.id, store.content)
+        console.log('@向量化: ', res);
       } catch (error) {
         console.error(error);
       }
     }
+  }
+
+  // 向量化入库
+  async addEmbeddingText(id: string, content: string) {
+    const embeddingArr = await this.aIModelService.embedding(content);
+    const tableName = 'wx_message'
+    const query = `
+          UPDATE "${tableName}"
+          SET documents = $1::vector
+          WHERE id = $2;
+      `;
+    // 使用参数化查询避免 SQL 注入
+    const res = await this.prisma.$executeRawUnsafe(query, embeddingArr, id);
+    const success = res > 0;
+    return success;
   }
 
   async addContactsIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient) {
