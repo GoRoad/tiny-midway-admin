@@ -26,6 +26,7 @@ export interface GeweMessage {
   TypeName: string;
   Appid: string;
   Wxid: string;
+  testMsg?: string;
   Data: GeweMessageData;
 }
 

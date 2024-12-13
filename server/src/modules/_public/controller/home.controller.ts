@@ -32,7 +32,11 @@ export class HomeController {
     }
     // 掉线消息
     if (data.TypeName === 'Offline') {
-      console.log('@账号掉线', data);
+      console.log('@账号掉线 ', data);
+    }
+    // 回调成功消息
+    if (data?.testMsg) {
+      console.log('@回调消息 ' + data.testMsg);
     }
     return { success: true, message: 'OK' };
   }
