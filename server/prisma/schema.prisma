@@ -207,7 +207,7 @@ model WxUser {
   headImgUrl String?
   uin        Int?
   status     Int // 0离线 1在线
-  wxid       String    @unique
+  wxId       String    @unique
   appId      String // 登录设备id
   loginAt    DateTime? // 登录时间
   createdAt  DateTime  @default(now())
@@ -245,8 +245,8 @@ model AIBot {
   // 关联表
   workflow   Workflow? @relation("AIBotWorkflows", fields: [workflowId], references: [id])
   workflowId Int?
-  wx         WxUser?   @relation("AIBotWxUsers", fields: [wxid], references: [id])
-  wxid       Int?
+  wx         WxUser?   @relation("AIBotWxUsers", fields: [wxId], references: [id])
+  wxId       Int?
 
   @@map("ai_bot")
 }
@@ -263,4 +263,66 @@ model Workflow {
   aiBot AIBot[] @relation("AIBotWorkflows")
 
   @@map("workflow")
+}
+
+model WxContact {
+  id              String   @id @db.VarChar(50)
+  nickname        String?  @db.VarChar(50)
+  pyInitial       String?  @db.VarChar(50)
+  sex             Int?
+  bigHeadImgUrl   String?
+  smallHeadImgUrl String?
+  country         String?  @db.VarChar(20)
+  province        String?  @db.VarChar(20)
+  city            String?  @db.VarChar(20)
+  createTime      DateTime @default(now())
+  updateTime      DateTime @updatedAt
+
+  messagesSent     WxMessage[] @relation("Sender")
+  messagesReceived WxMessage[] @relation("Receiver")
+  // 用户参与的群组
+  groups           WxGroup[]   @relation("UserGroups")
+
+  @@map("wx_contact")
+}
+
+model WxGroup {
+  id              String   @id @db.VarChar(50)
+  nickName        String?  @db.VarChar(50)
+  pyInitial       String?  @db.VarChar(50)
+  chatRoomNotify  Int?
+  chatRoomOwner   String?  @db.VarChar(50)
+  smallHeadImgUrl String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  contacts WxContact[] @relation("UserGroups")
+  messages WxMessage[] @relation("GroupMessage")
+
+  @@map("wx_group")
+}
+
+model WxMessage {
+  id          String                 @id
+  appId       String                 @db.VarChar(50)
+  wxId        String                 @db.VarChar(50)
+  groupId     String?                @db.VarChar(50)
+  type        Int
+  fromId      String                 @db.VarChar(50)
+  toId        String                 @db.VarChar(50)
+  content     String
+  documents   Unsupported("vector")?
+  pushContent String?
+  postTime    DateTime
+  createTime  DateTime               @default(now())
+  updateTime  DateTime               @updatedAt
+
+  sender   WxContact @relation("Sender", fields: [fromId], references: [id])
+  receiver WxContact @relation("Receiver", fields: [toId], references: [id])
+
+  group WxGroup? @relation("GroupMessage", fields: [groupId], references: [id])
+
+  @@index([wxId])
+  @@index([fromId])
+  @@map("wx_message")
 }
