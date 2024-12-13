@@ -7,6 +7,7 @@ import {
   Inject,
 } from '@midwayjs/core';
 import { Prisma, PrismaClient } from '@prisma/client';
+import { Contact } from '../dto/IMessage';
 import * as _ from 'lodash';
 
 @Provide()
@@ -149,6 +150,16 @@ export class GeweService {
       token: await this.getToken(),
       callbackUrl: url,
     });
+    return result;
+  }
+
+  async contactsInfo(appId: string, wxids: string[]) {
+    const result: Contact[] = await this.request('POST', '/contacts/getDetailInfo', { appId, wxids });
+    return result;
+  }
+
+  async roomMemberInfo(appId: string, chatroomId: string, memberWxids: string[]) {
+    const result: Contact[] = await this.request('POST', '/group/getChatroomMemberDetail', { appId, chatroomId, memberWxids });
     return result;
   }
 }

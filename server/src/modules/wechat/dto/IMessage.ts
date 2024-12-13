@@ -113,3 +113,46 @@ export const MessageType = {
   Voip: 'voip', // voip消息
   RealTimeLocation: 'real_time_location', // 实时位置共享
 };
+
+export interface Member {
+  wxid: string;
+  nickName: string;
+  memberFlag: number;
+}
+
+export interface ChatRoom {
+  chatroomId: string;
+  nickName: string;
+  pyInitial: string;
+  quanPin: string;
+  remark: string | null;
+  remarkPyInitial: string | null;
+  remarkQuanPin: string | null;
+  chatRoomNotify: number;
+  chatRoomOwner: string; // 群主id
+  smallHeadImgUrl: string;
+  memberList: Member[]; // 有缓存，接口获取群成员名单
+}
+
+export interface Contact {
+  userName: string;
+  nickName: string;
+  pyInitial: string;
+  quanPin: string;
+  sex: number;
+  remark: string;
+  remarkPyInitial: string;
+  remarkQuanPin: string;
+  signature: string | null;
+  alias: string;
+  snsBgImg: string | null;
+  country: string;
+  bigHeadImgUrl: string;
+  smallHeadImgUrl: string;
+  description: string | null;
+  cardImgUrl: string | null;
+  labelList: any[] | null;
+  province: string;
+  city: string;
+  phoneNumList: any[] | null;
+}

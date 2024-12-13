@@ -267,7 +267,7 @@ model Workflow {
 
 model WxContact {
   id              String   @id @db.VarChar(50)
-  nickname        String?  @db.VarChar(50)
+  nickName        String?  @db.VarChar(50)
   pyInitial       String?  @db.VarChar(50)
   sex             Int?
   bigHeadImgUrl   String?

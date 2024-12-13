@@ -66,4 +66,18 @@ export class GeweController {
     const _url = decodeURIComponent(url);
     return this.geweService.setCallback(_url);
   }
+
+  // 联系人模块
+  // 获取群信息/好友详细信息
+  @Post('/contacts/getDetailInfo')
+  async getContactsInfo(@Body('appId') appId: string, @Body('wxids') wxids: string[]): Promise<any> {
+    return this.geweService.contactsInfo(appId, wxids);
+  }
+
+  // 群模块
+  // 获取群成员详情
+  @Post('/group/getChatroomMemberDetail')
+  async getRoomMemberInfo(@Body('appId') appId: string, @Body('chatroomId') chatroomId: string , @Body('memberWxids') memberWxids: string[]): Promise<any> {
+    return this.geweService.roomMemberInfo(appId, chatroomId, memberWxids);
+  }
 }
