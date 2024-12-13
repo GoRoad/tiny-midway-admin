@@ -91,9 +91,9 @@ export class WxMessageService {
       try {
         const store = await this.prisma.$transaction(async client => {
           // 检查发信人、收信人是否存在，否则自动入库
-          await this.upsertContacts(data.appId, [data.fromId, data.toId], client);
+          await this.addContactsIfMiss(data.appId, [data.fromId, data.toId], client);
           // 检查群数据是否存在，否则自动入库
-          if (data.groupId) await this.upsertGropu(msg.appid, data.groupId, client);
+          if (data.groupId) await this.addGroupIfMiss(msg.appid, [data.groupId], client);
           // 入库
           return await client.wxMessage.create({ data });
         });
@@ -104,7 +104,7 @@ export class WxMessageService {
     }
   }
 
-  async upsertContacts(appId: string, ids: string[], prisma: OmitPrismaClient) {
+  async addContactsIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient) {
     const records = await prisma.wxContact.findMany({
       where: {
         id: {
@@ -126,24 +126,30 @@ export class WxMessageService {
         _item.id = item.userName;
         return _item;
       });
-      await prisma.wxContact.createMany({
-        data
-      })
+      await prisma.wxContact.createMany({ data });
     }
+    return true;
   }
 
-  async upsertGropu(appId: string, groupId: string, prisma: OmitPrismaClient) {
-    const group = await prisma.wxGroup.findFirst({
-      where: { id: groupId },
-    });
-    if (!group) {
-      const groupInfo = await this.geweService.contactsInfo(appId, [groupId]);
-      await prisma.wxGroup.create({
-        data: {
-          id: groupId,
-          nickName: groupInfo[0].nickName,
+  async addGroupIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient) {
+    const records = await prisma.wxGroup.findMany({
+      where: {
+        id: {
+          in: ids,
         },
-      });
+      },
+      select: {
+        id: true,
+      },
+    });
+    // 提取已存在的转换为set
+    const idsSet = new Set(records.map(record => record.id));
+    // 过滤出不存在的
+    const missIds = ids.filter(id => !idsSet.has(id));
+    if (missIds.length > 0) {
+      const groupInfos = await this.geweService.contactsInfo(appId, missIds);
+      const data = groupInfos.map(item => ({ id: item.userName, nickName: item.nickName }));
+      await prisma.wxGroup.createMany({ data });
     }
     return true;
   }
