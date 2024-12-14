@@ -2,6 +2,8 @@ import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const main = async () => {
+  console.log('set vector ...');
+  await prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS vector;`;
   console.log('Start seeding ...');
   const ADMIN_ROLE_NAME = 'admin_role';
   const GUEST_ROLE_NAME = 'guest_role';
@@ -492,7 +494,7 @@ const main = async () => {
     updateTime: new Date(),
   });
 
-  parent = await insertResource({
+  await insertResource({
     name: '用户管理',
     code: 'UserMgt',
     type: 'MENU',
@@ -510,6 +512,179 @@ const main = async () => {
     show: true,
     enable: true,
     order: 2,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  // 插入微信管理菜单
+  parent = await insertResource({
+    name: '微信管理',
+    code: 'WxMgt',
+    type: 'MENU',
+    path: null,
+    redirect: null,
+    icon: 'i-fe:twitch',
+    component: null,
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 1,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  await insertResource({
+    name: '账号管理',
+    code: 'WxAccountMgt',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/wxchat/account',
+    redirect: null,
+    icon: 'i-fe:user',
+    component: '/src/views/wechat/account/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 0,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  await insertResource({
+    name: 'AI机器人',
+    code: 'WxBot',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/wechat/bot',
+    redirect: null,
+    icon: 'i-fe:cpu',
+    component: '/src/views/wechat/ai-bot/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 1,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  await insertResource({
+    name: '联系人管理',
+    code: 'WxContacts',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/wxchat/contacts',
+    redirect: null,
+    icon: 'i-fe:message-circle',
+    component: '/src/views/wechat/contacts/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 2,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  await insertResource({
+    name: '群管理',
+    code: 'WxGroup',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/wxchat/group',
+    redirect: null,
+    icon: 'i-fe:users',
+    component: '/src/views/wechat/group/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 3,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  await insertResource({
+    name: '聊天记录',
+    code: 'WxHistory',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/wxchat/history',
+    redirect: null,
+    icon: 'i-fe:database',
+    component: '/src/views/wechat/history/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 4,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+  
+
+  // 插入ai模型菜单
+  parent = await insertResource({
+    name: 'AI管理',
+    code: 'ModelMgt',
+    type: 'MENU',
+    path: null,
+    redirect: null,
+    icon: 'i-fe:server',
+    component: null,
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 0,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
+  await insertResource({
+    name: '模型配置',
+    code: 'ModelCfg',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/src/openai/model',
+    redirect: null,
+    icon: 'i-fe:box',
+    component: '/src/views/openai/model/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 0,
     createTime: new Date(),
     updateTime: new Date(),
   });
@@ -546,6 +721,8 @@ const main = async () => {
     'Demo', 'ImgUpload', 'CrudDemo', 'DemoRichText', 'Data', 'DataDict',
     'DataFile', 'SysMgt', 'ResourceMgt', 'RoleMgt', 'UserMgt', 'UserProfile',
     'demo:crud:add', 'demo:crud:remove', 'demo:crud:edit', 'demo:crud:view',
+    'WxMgt', 'WxAccountMgt', 'WxBot', 'WxContacts', 'WxGroup', 'WxHistory',
+    'ModelMgt', 'ModelCfg'
   ];
 
   for (const code of accessCodes) {
