@@ -6,7 +6,7 @@
 
 感谢Gewechat，功能依赖[Gewechat](https://github.com/Devo919/Gewechat?tab=readme-ov-file)
 
-感谢Gewechaty，代码参考[Gewechat](https://github.com/mikoshu/gewechaty/)
+感谢Gewechaty，代码参考[Gewechaty](https://github.com/mikoshu/gewechaty/)
 
 感谢群里大佬 `@1H` 重构了镜像
 
