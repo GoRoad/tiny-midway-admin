@@ -11,7 +11,7 @@ import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
     apis: ['list', 'page', 'info', 'create', 'update', 'delete'],
   }
 )
-export class ContactsController extends BaseController {
+export class GropuController extends BaseController {
   @Inject()
   protected service: GropuService;
 }

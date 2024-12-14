@@ -1,9 +1,9 @@
 import { Inject, Provide } from '@midwayjs/core';
-import { PrismaClient, AIBot } from '@prisma/client';
+import { PrismaClient, WxContact } from '@prisma/client';
 import { BaseService } from '../../../core/crud_service';
 
 @Provide()
-export class ContactsService extends BaseService<AIBot> {
+export class ContactsService extends BaseService<WxContact> {
   @Inject('prisma')
   prismaClient: PrismaClient;
 
