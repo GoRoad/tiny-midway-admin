@@ -167,7 +167,10 @@ export class WxMessageService {
     const missIds = ids.filter(id => !idsSet.has(id));
     if (missIds.length > 0) {
       const groupInfos = await this.geweService.contactsInfo(appId, missIds);
-      const data = groupInfos.map(item => ({ id: item.userName, nickName: item.nickName }));
+      const data = groupInfos.map(item => {
+        const obj = _.pick(item, ['nickName', 'pyInitial', 'chatRoomNotify', 'chatRoomOwner', 'smallHeadImgUrl'])
+        return { ...obj, id: item.userName }
+      });
       await prisma.wxGroup.createMany({ data });
     }
     return true;
