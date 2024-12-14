@@ -85,7 +85,6 @@ export class HomeController {
 
   @Get('/model/:id')
   async publicAPI(@Param('id') id: number, @Query('q') q: string = '你用的模型？') {
-    // const prompt = await this.prisma.aIBot.findFirst({where:{name: ''}})
     const chat = await this.aIModelService.getOpenAIModel(id);
     const messages = [
       new SystemMessage('prompt.prompt'),
@@ -93,6 +92,17 @@ export class HomeController {
     ];
     const res = await chat.invoke(messages);
     return res.content;
+
+    // const arr = await this.aIModelService.embedding('互相赠送礼物');
+    // const groupId = 'xxxx@chatroom';
+    // const limit = 5;
+    // const result = await this.prisma.$queryRaw`
+    //   SELECT msg.content  FROM "wx_message" msg
+    //   WHERE msg."groupId" = ${groupId}
+    //   ORDER BY documents <-> ${arr}::vector
+    //   LIMIT ${limit};
+    // `;
+    // return result;
   }
 
   @Get('/vision/:id')
