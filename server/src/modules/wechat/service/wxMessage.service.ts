@@ -91,7 +91,7 @@ export class WxMessageService {
       try {
         const store = await this.prisma.$transaction(async client => {
           // 检查发信人、收信人是否存在，否则自动入库
-          await this.addContactsIfMiss(data.appId, [data.fromId, data.toId], client);
+          await this.addContactsIfMiss(data.appId, [data.fromId, data.toId], client, data.groupId);
           // 检查群数据是否存在，否则自动入库
           if (data.groupId) await this.addGroupIfMiss(msg.appid, [data.groupId], client);
           // 入库
@@ -121,7 +121,7 @@ export class WxMessageService {
     return success;
   }
 
-  async addContactsIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient) {
+  async addContactsIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient, groupId: string = '') {
     const records = await prisma.wxContact.findMany({
       where: {
         id: {
@@ -137,7 +137,9 @@ export class WxMessageService {
     // 过滤出不存在的
     const missIds = ids.filter(id => !idsSet.has(id));
     if (missIds.length > 0) {
-      const contacts = await this.geweService.contactsInfo(appId, missIds);
+      const contacts = groupId ? 
+        await this.geweService.roomMemberInfo(appId, groupId, missIds) : 
+        await this.geweService.contactsInfo(appId, missIds);
       const data = contacts.map(item => {
         const _item = _.pick(item, ['id', 'nickName', 'pyInitial', 'sex', 'bigHeadImgUrl', 'smallHeadImgUrl', 'country', 'province', 'city']) as any;
         _item.id = item.userName;

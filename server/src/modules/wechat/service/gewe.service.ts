@@ -153,11 +153,13 @@ export class GeweService {
     return result;
   }
 
+  // 获取群/群友粗略信息，好友详情
   async contactsInfo(appId: string, wxids: string[]) {
     const result: Contact[] = await this.request('POST', '/contacts/getDetailInfo', { appId, wxids });
     return result;
   }
 
+  // 获取群友详细信息
   async roomMemberInfo(appId: string, chatroomId: string, memberWxids: string[]) {
     const result: Contact[] = await this.request('POST', '/group/getChatroomMemberDetail', { appId, chatroomId, memberWxids });
     return result;
