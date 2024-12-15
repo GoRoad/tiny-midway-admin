@@ -3,11 +3,11 @@
 ⚡ 此项目属于tiny-midway-admin(此处简称Tiny)衍生项目，目的是创造一个能快速接入微信的个人ai助手，使用向量化存储聊天记录，让你的私人助手更智能。本项目仅供个人学习使用且未经过规模测试，不得用于任何商业或非法行为，否则后果自负。
 
 ## 部分功能
-
+开发板，还未稳定，谢谢关注!
 
 ## 快速入门
 运行环境：docker、nodejs
-本项目总运行总共需要三个部分： Tiny、Gewechat，Tiny提供admin管理界面，接入微信的功能依靠[Gewechat](https://github.com/Devo919/Gewechat)实现
+本项目总运行总共需要三个部分： Tiny、Gewechat、PostgreSQL，Tiny提供admin管理界面，接入微信的功能依靠[Gewechat](https://github.com/Devo919/Gewechat)实现，PostgreSQL用于存储向量化数据。
 
 ### Tiny
 
@@ -40,7 +40,7 @@ docker run --name pgvector --restart=always -e POSTGRES_USER=pgvector -e POSTGRE
 ```
 
 ### 本地开发
-- 连接数据库创建数据库：tiny_admin
+- 创建数据库：tiny_admin
 - 修改/server/.env数据库配置 DATABASE_URL="postgresql://user:pwd@host:port/tiny_admin?schema=public"
 
 数据库初始化
@@ -65,8 +65,10 @@ npm run dev
 http://localhost:3200/
 
 ## 学习互助群
+开发板，还未稳定，谢谢关注!
+
 说明：目前项目还不稳定，测试（踩坑）为主，我会尽快修复，Peace and love.
-![img](/img/g_20241215.jpg)
+<img src="" alt="Alt Text" width="300" height="200">
 
 ## 鸣谢
 - 感谢Gewechat，功能依赖[Gewechat](https://github.com/Devo919/Gewechat)
