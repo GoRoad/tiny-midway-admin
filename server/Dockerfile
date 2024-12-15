@@ -7,6 +7,8 @@ WORKDIR /build
 RUN apk add --no-cache tzdata
 # 设置时区为中国东八区，这里的配置可以被docker-compose.yml或docker run时指定的时区覆盖
 ENV TZ="Asia/Shanghai"
+# 安装openssl
+RUN apk add --no-cache openssl
 # 服务器编译打包
 # 根据服务器环境选择国内源
 RUN npm config set registry https://registry.npmmirror.com
@@ -15,6 +17,7 @@ COPY . .
 # 构建阶段会使用到开发依赖所以不能使用 --production 安装依赖
 RUN set -x && npm install && echo "Install Done."
 # 初始化数据库
+RUN set -x && npx prisma migrate deploy && echo "DB deploy."
 RUN set -x && npm run prisma:init && echo "DB Done."
 # 构建项目
 RUN set -x && npm run build && echo "Build Done."

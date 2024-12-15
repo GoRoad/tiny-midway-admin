@@ -1,3 +1,4 @@
+# 不能用，还要改
 # 命令在项目根目录执行
 
 # docker compose up -d 以守护进程（detached）模式运行，即在后台运行服务而不会阻塞终端。
@@ -8,25 +9,45 @@
 # docker-compose build 编译、重新编译本项目所有镜像
 # docker-compose build web 编译本项目services.web项目
 
-version: '2'
+version: '3.9'
 
 networks:
   admin-net:
     driver: bridge
 
 services:
+  pgvector:
+    container_name: pgvector
+    image: pgvector/pgvector:pg16
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: pwdroot
+    ports:
+      - 5433:5432
+    volumes:
+      - /root/pgvector/data:/var/lib/postgresql/data
+    networks:
+      - admin-net
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root", "-d", "postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   server:
     container_name: admin-serve
     build:
       context: ./server
       dockerfile: Dockerfile
-    expose:
-      - 7001
-    # 需要映射端口，为避免跨域admin使用nginx的反向代理url将/v1/转发到7001
     ports:
       - 7001:7001
     networks:
       - admin-net
+    depends_on:
+      pgvector:
+        condition: service_healthy
+
   admin:
     container_name: admin
     build:
@@ -38,3 +59,15 @@ services:
       - admin-net
     depends_on:
       - server
+
+  gewe:
+    container_name: gewe
+    image: registry.cn-chengdu.aliyuncs.com/tu1h/wechotd:alpine
+    restart: always
+    ports:
+      - 2531:2531
+      - 2532:2532
+    volumes:
+      - /root/temp:/root/temp
+    networks:
+      - admin-net
