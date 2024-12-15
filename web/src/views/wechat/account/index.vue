@@ -85,9 +85,9 @@
               <thead>
                 <tr>
                   <th width="160">昵称</th>
-                  <th width="160">微信号</th>
+                  <th width="55">头像</th>
                   <th width="200">wxId</th>
-                  <th width="220">登录设备</th>
+                  <th width="260">登录设备</th>
                   <th width="60">状态</th>
                   <th width="160">登录时间</th>
                   <th width="80">操作</th>
@@ -96,7 +96,9 @@
               <tbody>
                 <tr v-for="item in wxUsers">
                   <td>{{ item.nickName }}</td>
-                  <td>{{ item.alias }}</td>
+                  <td>
+                    <n-image width="50" height="50" :src="item.headImgUrl"></n-image>
+                  </td>
                   <td>{{ item.wxId }}</td>
                   <td>{{ item.appId }}</td>
                   <td>{{ item.status == 1 ? '在线' : '离线' }}</td>
@@ -253,6 +255,7 @@ const checkLoginStatus = async () => {
       const wxInfo = {
         appId: loginModal.appId,
         status: 1,
+        headImgUrl: checkLogin.data.headImgUrl,
         loginAt: new Date(),
         alias: loginModal.loginInfo.alias,
         mobile: loginModal.loginInfo.mobile,
