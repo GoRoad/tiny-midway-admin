@@ -26,6 +26,8 @@ export class Message {
   _msgSource: any;
   _roomInfo?: any;
 
+  isSendRoom: boolean;
+
   constructor(data: GeweMessage) {
     this.appid = data.Appid;
     this.wxid = data.Wxid;
@@ -43,6 +45,8 @@ export class Message {
     this._msgSeq = data.Data.MsgSeq || null;
     this._status = data.Data.Status || null;
     this._msgSource = data.Data.MsgSource || null;
+
+    this.isSendRoom = this._self && this.toId.endsWith('@chatroom');
 
     // if (this.isRoom) {
     //   getRoomInfo(this.fromId);

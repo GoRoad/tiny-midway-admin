@@ -243,18 +243,22 @@ const checkLoginStatus = async () => {
   try {
     const checkLogin = await api.checkLogin({
       appId: loginModal.appId,
-      uuid: loginModal.uuid
+      uuid: loginModal.uuid,
     });
     // console.log('checkLogin: ', checkLogin);
-    if (checkLogin.data.loginInfo) {
+    if (checkLogin.data?.loginInfo) {
       loginModal.loginInfo = checkLogin.data.loginInfo
       setCallBackUrl()
       // 更新微信登录信息
       const wxInfo = {
-        ...checkLogin.data.loginInfo,
         appId: loginModal.appId,
         status: 1,
-        loginAt: new Date()
+        loginAt: new Date(),
+        alias: loginModal.loginInfo.alias,
+        mobile: loginModal.loginInfo.mobile,
+        nickName: loginModal.loginInfo.nickName,
+        uin: loginModal.loginInfo.uin,
+        wxId: loginModal.loginInfo.wxid,
       }
       await setWxUser(wxInfo)
       loginModal.status = `【${checkLogin.data.loginInfo.nickName}】 登录成功`

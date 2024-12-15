@@ -68,6 +68,7 @@ export class WxMessageService {
     const type = msg.type();
     if (type !== 'text') throw new Error('不能处理这类消息！');
     const isRoom = msg.isRoom;
+    const isSendRoom = msg.isSendRoom;
     if (type === 'text') {
       const text = msg._text;
       const data = {
@@ -75,6 +76,7 @@ export class WxMessageService {
         appId: msg.appid,
         wxId: msg.wxid,
         type: msg._type,
+        fromId: msg.fromId,
         toId: msg.toId,
         content: msg.text(),
         pushContent: msg._pushContent,
@@ -85,9 +87,13 @@ export class WxMessageService {
         data.groupId = msg.fromId;
         const [_fromId] = text.split(':');
         data.fromId = _fromId;
+      } else if (isSendRoom) {
+        data.groupId = msg.toId;
       } else {
         data.fromId = msg.fromId;
       }
+      // 企业微信无法获取信息
+      if (data.fromId.endsWith('@openim')) return console.log('企微无法获取信息')
       try {
         const store = await this.prisma.$transaction(async client => {
           // 检查发信人、收信人是否存在，否则自动入库
@@ -97,9 +103,8 @@ export class WxMessageService {
           // 入库
           return await client.wxMessage.create({ data });
         });
-        console.log('@入库成功: ', store.pushContent);
         const res = await this.addEmbeddingText(store.id, store.content)
-        console.log('@向量化: ', res);
+        console.log('@入库成功: ', store.pushContent, res);
       } catch (error) {
         console.error(error);
       }
@@ -141,9 +146,11 @@ export class WxMessageService {
         await this.geweService.roomMemberInfo(appId, groupId, missIds) : 
         await this.geweService.contactsInfo(appId, missIds);
       const data = contacts.map(item => {
-        const _item = _.pick(item, ['id', 'nickName', 'pyInitial', 'sex', 'bigHeadImgUrl', 'smallHeadImgUrl', 'country', 'province', 'city']) as any;
-        _item.id = item.userName;
-        return _item;
+        if (!item.userName) {
+          console.error('@缺少联系人信息: ', groupId, missIds, item);
+        }
+        const obj = _.pick(item, ['nickName', 'pyInitial', 'sex', 'bigHeadImgUrl', 'smallHeadImgUrl', 'country', 'province', 'city']);
+        return { ...obj, id: item.userName }
       });
       await prisma.wxContact.createMany({ data });
     }
@@ -168,6 +175,9 @@ export class WxMessageService {
     if (missIds.length > 0) {
       const groupInfos = await this.geweService.contactsInfo(appId, missIds);
       const data = groupInfos.map(item => {
+        if (!item.userName) {
+          console.error('@缺少群信息: ', missIds, item);
+        }
         const obj = _.pick(item, ['nickName', 'pyInitial', 'chatRoomNotify', 'chatRoomOwner', 'smallHeadImgUrl'])
         return { ...obj, id: item.userName }
       });

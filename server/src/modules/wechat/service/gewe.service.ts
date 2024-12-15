@@ -57,7 +57,7 @@ export class GeweService {
     }
     const result: any = await makeHttpRequest(fullUrl, options);
     const _data = result.data;
-    console.log('GeweService http: ', _data);
+    console.log('GeweService http: ', fullUrl, _data);
     if (_data.ret === 200) {
       return 'data' in _data ? _data.data : _data.msg;
     } else {
