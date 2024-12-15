@@ -124,10 +124,12 @@ export class WxMessageService {
   }
 
   async addContactsIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient, groupId: string = '') {
+    // 处理id重复的情况，防止id冲突
+    const _ids = [...new Set(ids)];
     const records = await prisma.wxContact.findMany({
       where: {
         id: {
-          in: ids,
+          in: _ids,
         },
       },
       select: {
@@ -137,7 +139,7 @@ export class WxMessageService {
     // 提取已存在的转换为set
     const idsSet = new Set(records.map(record => record.id));
     // 过滤出不存在的
-    const missIds = ids.filter(id => !idsSet.has(id));
+    const missIds = _ids.filter(id => !idsSet.has(id));
     if (missIds.length > 0) {
       const contacts = groupId ? 
         await this.geweService.roomMemberInfo(appId, groupId, missIds) : 
@@ -155,10 +157,12 @@ export class WxMessageService {
   }
 
   async addGroupIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient) {
+    // 处理id重复的情况，防止id冲突
+    const _ids = [...new Set(ids)];
     const records = await prisma.wxGroup.findMany({
       where: {
         id: {
-          in: ids,
+          in: _ids,
         },
       },
       select: {
@@ -168,7 +172,7 @@ export class WxMessageService {
     // 提取已存在的转换为set
     const idsSet = new Set(records.map(record => record.id));
     // 过滤出不存在的
-    const missIds = ids.filter(id => !idsSet.has(id));
+    const missIds = _ids.filter(id => !idsSet.has(id));
     if (missIds.length > 0) {
       const groupInfos = await this.geweService.contactsInfo(appId, missIds);
       const data = groupInfos.map(item => {
