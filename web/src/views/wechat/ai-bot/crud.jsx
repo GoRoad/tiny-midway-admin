@@ -1,15 +1,10 @@
 import { request } from "@/utils";
-import { dict } from "@fast-crud/fast-crud";
+import { dict, compute } from "@fast-crud/fast-crud";
 import { formatDate, createPermissionOpt } from "@/utils";
 
 import { ref } from "vue";
-import { useAuthStore } from "@/store";
-import axios from "axios";
 
-const _loading = ref(false);
-console.log("_loading: ", _loading);
 
-const { accessToken } = useAuthStore();
 /**
  * 接口配置
  */
@@ -101,24 +96,79 @@ export default function ({ crudExpose, context }) {
             width: 160,
           }
         },
-        workflowId: {
-          title: "工作流",
+        modelId: {
+          title: 'AI模型',
           search: {
             show: true,
             rules: null,
           },
           type: 'dict-select',
           dict: dict({
-            // url: '/base/dict/wechat/wx-user1',
+            url: '/base/dict/openai/models',
           }),
           form: {
-            // rule: [{ required: true, message: '请选择一个工作流' }],
+            rule: [{ required: true, message: '请选择一个AI模型' }],
             col: { span: 14 },
           },
           column: {
-            show: false
+            width: 160,
           }
         },
+        useDataSource: {
+          title: "读取聊天记录",
+          type: 'dict-switch',
+          form: {
+            col: { span: 14 }
+          },
+          dict: dict({
+            data: [
+              { value: true, label: '开启' },
+              { value: false, label: '关闭' },
+            ],
+          }),
+          column: { width: 120, }
+        },
+        emModelId: {
+          title: '嵌入模型',
+          search: {
+            show: true,
+            rules: null,
+          },
+          type: 'dict-select',
+          dict: dict({
+            url: '/base/dict/openai/models',
+          }),
+          form: {
+            helper: '用于向量化聊天记录并存储',
+            show: compute(({ form }) => {
+              const show = form?.useDataSource
+              return !!show;
+            }),
+            rule: [{ required: true, message: '请选择一个AI模型' }],
+            col: { span: 14 },
+          },
+          column: {
+            width: 160,
+          }
+        },
+        // workflowId: {
+        //   title: "工作流",
+        //   search: {
+        //     show: true,
+        //     rules: null,
+        //   },
+        //   type: 'dict-select',
+        //   dict: dict({
+        //     // url: '/base/dict/wechat/wx-user1',
+        //   }),
+        //   form: {
+        //     // rule: [{ required: true, message: '请选择一个工作流' }],
+        //     col: { span: 14 },
+        //   },
+        //   column: {
+        //     show: false
+        //   }
+        // },
         description: {
           title: "简介",
           type: "text",
@@ -142,43 +192,29 @@ export default function ({ crudExpose, context }) {
             ellipsis: true,
           },
         },
-        plugins: {
-          title: "插件列表",
-          type: "array",
-          form: {
-            component: { type: "select", mode: "multiple" },
-            col: { span: 14 },
-          },
-          column: {
-            show: false,
-          },
-        },
-        useDataSource: {
-          title: "数据源权限",
-          type: 'dict-switch',
-          form: {
-            col: { span: 14 }
-          },
-          dict: dict({
-            data: [
-              { value: true, label: '开启' },
-              { value: false, label: '关闭' },
-            ],
-          }),
-          column: { width: 100, }
-        },
-        dataSource: {
-          title: "数据来源",
-          type: "array",
-          form: {
-            component: { type: "input", mode: "tags" },
-            col: { span: 14 },
-          },
-          column: {
-            show: true,
-            width: 160,
-          },
-        },
+        // plugins: {
+        //   title: "插件列表",
+        //   type: "array",
+        //   form: {
+        //     component: { type: "select", mode: "multiple" },
+        //     col: { span: 14 },
+        //   },
+        //   column: {
+        //     show: false,
+        //   },
+        // },
+        // dataSource: {
+        //   title: "数据来源",
+        //   type: "array",
+        //   form: {
+        //     component: { type: "input", mode: "tags" },
+        //     col: { span: 14 },
+        //   },
+        //   column: {
+        //     show: true,
+        //     width: 160,
+        //   },
+        // },
         createdAt: {
           title: "创建时间",
           type: "text",

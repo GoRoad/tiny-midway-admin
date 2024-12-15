@@ -33,8 +33,8 @@ export class AIModelService extends BaseService<AIModelConfig> {
     return openai;
   }
 
-  public async embedding(text: string) {
-    const model = await this.model.findFirst({ where: { name: 'embedding' } });
+  public async embedding(emModelId: number, text: string) {
+    const model = await this.model.findFirst({ where: { id: emModelId } });
     if (!model) throw new Error('向量化模型未配置!');
     const options = {
       headers: {

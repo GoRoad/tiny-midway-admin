@@ -81,7 +81,15 @@ export class DictService {
   async getWxUserDict() {
     const data = await this.prisma.wxUser.findMany();
     const res = data.map(item => {
-      return { value: item.id, label: item.nickName }
+      return { value: item.wxId, label: item.nickName }
+    })
+    return res
+  }
+
+  async aiModelDict() {
+    const data = await this.prisma.aIModelConfig.findMany();
+    const res = data.map(item => {
+      return { value: item.id, label: item.name }
     })
     return res
   }

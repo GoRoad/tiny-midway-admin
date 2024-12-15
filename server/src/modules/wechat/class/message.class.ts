@@ -29,24 +29,31 @@ export class Message {
   isSendRoom: boolean;
 
   constructor(data: GeweMessage) {
-    this.appid = data.Appid;
-    this.wxid = data.Wxid;
-    this.fromId = data.Data.FromUserName.string;
-    this.toId = data.Data.ToUserName.string;
-    this.isRoom = data.Data.FromUserName.string.endsWith('@chatroom');
-    this._msgId = data.Data.MsgId || null;
-    this._newMsgId = data.Data.NewMsgId || null;
-    this._text = data.Data.Content?.string || '';
-    this._type = data.Data.MsgType;
-    this._createTime = data.Data.CreateTime;
-    this._date = this._createTime * 1000;
-    this._self = data.Wxid === data.Data.FromUserName.string;
-    this._pushContent = data.Data.PushContent || '';
-    this._msgSeq = data.Data.MsgSeq || null;
-    this._status = data.Data.Status || null;
-    this._msgSource = data.Data.MsgSource || null;
+    
+    try {
+      this.appid = data.Appid;
+      this.wxid = data.Wxid;
+      this.fromId = data.Data.FromUserName.string;
+      this.toId = data.Data.ToUserName.string;
+      this.isRoom = data.Data.FromUserName.string.endsWith('@chatroom');
+      this._msgId = data.Data.MsgId || null;
+      this._newMsgId = data.Data.NewMsgId || null;
+      this._text = data.Data.Content?.string || '';
+      this._type = data.Data.MsgType;
+      this._createTime = data.Data.CreateTime;
+      this._date = this._createTime * 1000;
+      this._self = data.Wxid === data.Data.FromUserName.string;
+      this._pushContent = data.Data.PushContent || '';
+      this._msgSeq = data.Data.MsgSeq || null;
+      this._status = data.Data.Status || null;
+      this._msgSource = data.Data.MsgSource || null;
 
-    this.isSendRoom = this._self && this.toId.endsWith('@chatroom');
+      this.isSendRoom = this._self && this.toId.endsWith('@chatroom');
+    } catch (error) {
+      console.log('Message error: ', error);
+      console.log('@未知消息结构', data);
+    }
+    
 
     // if (this.isRoom) {
     //   getRoomInfo(this.fromId);

@@ -38,7 +38,13 @@ export class DictController {
 
   // 获取ai能力字典
   @Get('/openai/sub-types')
-  async getOpenaiSubTypes() {
+  async getOpenAiSubTypes() {
     return this.dictService.openaiSubTypes()
+  }
+
+  // 获取ai模型字典
+  @Get('/openai/models')
+  async getOpenAiModels() {
+    return this.dictService.aiModelDict()
   }
 }

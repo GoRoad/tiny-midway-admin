@@ -32,39 +32,33 @@ export class WxMessageService {
   }
 
   async handleTextMsg(msg: Message) {
-    this.saveChatHistory(msg);
+    // 检查是否配置了机器人
+    const aiBot = await this.prisma.aIBot.findFirst({ where: { wxId: msg.wxid } });
+    if (!aiBot) return console.log('未配置机器人，不处理消息', msg._pushContent);
+    if (aiBot.useDataSource) this.saveChatHistory(msg, aiBot.emModelId);
     const text = msg.text();
-    const aiBot = await this.prisma.aIBot.findFirst({
-      where: {
-        wx: {
-          wxId: msg.wxid,
-        },
-      },
-    });
-    const messages = [new SystemMessage(aiBot?.prompt || ''), new HumanMessage(text)];
+    const messages = [new SystemMessage(aiBot.prompt), new HumanMessage(text)];
     if (msg.isRoom) {
       if (text.startsWith('ai ')) {
-        // this.sendMsg(msg.appid, msg.fromId, '你好，我是智能助手.')
-        const chat = await this.aIModelService.getOpenAIModel(3);
+        const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
         const res = await chat.invoke(messages);
         this.sendMsg(msg.appid, msg.fromId, res.content.toString());
       }
     } else if (!msg._self) {
-      // this.sendMsg(msg.appid, msg.fromId, '你好，我是你的私人智能助手.')
-      const chat = await this.aIModelService.getOpenAIModel(1);
+      const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
       const res = await chat.invoke(messages);
       this.sendMsg(msg.appid, msg.fromId, res.content.toString());
     }
   }
 
   async handleMessage(msg: Message) {
-    // console.log('@调试消息体: ', msg);
-    // console.log('@调试消息体 info: ', msg.type(), msg.text());
     const type = msg.type();
-    if (type === 'text') this.handleTextMsg(msg);
+    if (type === 'text') {
+      this.handleTextMsg(msg);
+    }
   }
 
-  async saveChatHistory(msg: Message) {
+  async saveChatHistory(msg: Message, emModelId: number) {
     const type = msg.type();
     if (type !== 'text') throw new Error('不能处理这类消息！');
     const isRoom = msg.isRoom;
@@ -106,7 +100,7 @@ export class WxMessageService {
           // 入库
           return await client.wxMessage.create({ data });
         });
-        const res = await this.addEmbeddingText(store.id, store.content)
+        const res = await this.addEmbeddingText(store.id, store.content, emModelId)
         console.log('@入库成功: ', store.pushContent, res);
       } catch (error) {
         console.error(error);
@@ -115,8 +109,8 @@ export class WxMessageService {
   }
 
   // 向量化入库
-  async addEmbeddingText(id: string, content: string) {
-    const embeddingArr = await this.aIModelService.embedding(content);
+  async addEmbeddingText(id: string, content: string, emModelId: number) {
+    const embeddingArr = await this.aIModelService.embedding(emModelId, content);
     const tableName = 'wx_message'
     const query = `
           UPDATE "${tableName}"

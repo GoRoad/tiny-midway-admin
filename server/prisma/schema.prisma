@@ -197,6 +197,9 @@ model AIModelConfig {
   createTime  DateTime @default(now())
   updateTime  DateTime @updatedAt
 
+  aiBotModel   AIBot[] @relation("AIBotAIModel")
+  aiBotModelEm AIBot[] @relation("AIBotAIModelEm")
+
   @@map("ai_model_config")
 }
 
@@ -214,7 +217,7 @@ model WxUser {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  aiBot AIBot[] @relation("AIBotWxUsers")
+  aiBot AIBot? @relation("AIBotWxUsers")
 
   @@map("wx_user")
 }
@@ -244,10 +247,17 @@ model AIBot {
   updatedAt     DateTime @updatedAt
 
   // 关联表
-  workflow   Workflow? @relation("AIBotWorkflows", fields: [workflowId], references: [id])
+  workflow   Workflow?      @relation("AIBotWorkflows", fields: [workflowId], references: [id])
   workflowId Int?
-  wx         WxUser?   @relation("AIBotWxUsers", fields: [wxId], references: [id])
-  wxId       Int?
+  // 关联一个微信号
+  wx         WxUser        @relation("AIBotWxUsers", fields: [wxId], references: [wxId])
+  wxId       String        @unique
+  // 关联对话模型
+  model      AIModelConfig @relation("AIBotAIModel", fields: [modelId], references: [id])
+  modelId    Int           @unique
+  // 关联嵌入模型
+  emModel    AIModelConfig? @relation("AIBotAIModelEm", fields: [emModelId], references: [id])
+  emModelId  Int?           @unique
 
   @@map("ai_bot")
 }

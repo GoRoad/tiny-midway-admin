@@ -25,9 +25,9 @@ export class HomeController {
 
   @Post('/wxBot/Callback')
   async wxBotCallback(@Body() data: GeweMessage): Promise<any> {
-    // 包装一下消息体，方便开发
-    const msg = new Message(data);
     if (data.TypeName === 'AddMsg') {
+      // 包装一下消息体，方便开发
+      const msg = new Message(data);
       await this.wxMessageService.handleMessage(msg);
     }
     // 掉线消息
