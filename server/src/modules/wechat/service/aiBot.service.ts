@@ -13,18 +13,35 @@ export class AIBotService extends BaseService<AIBot> {
   }
 
   public async create(data: AIBot): Promise<AIBot> {
-    const model = await this.model.create({ 
-      data: {
-        name: data.name,
-        description: data.name,
-        prompt: data.name,
-        useDataSource: data.useDataSource,
-        // workflow: data.workflowId ? { connect: { id: data.workflowId } } : undefined,
-        wx: data.wxId ? { connect: { wxId: data.wxId }}: undefined,
-        model: data.modelId ? { connect: { id: data.modelId }}: undefined,
-        emModel: data.emModelId ? { connect: { id: data.emModelId }}: undefined,
-      } 
-    });
-    return model;
+    try {
+      const model = await this.model.create({
+        data: {
+          name: data.name,
+          description: data.name,
+          prompt: data.name,
+          useDataSource: data.useDataSource,
+          // workflow: data.workflowId ? { connect: { id: data.workflowId } } : undefined,
+          wx: data.wxId ? { connect: { wxId: data.wxId } } : undefined,
+          model: data.modelId ? { connect: { id: data.modelId } } : undefined,
+          emModel: data.emModelId
+            ? { connect: { id: data.emModelId } }
+            : undefined,
+        },
+      });
+      return model;
+    } catch (error) {
+      if (error.code === 'P2014') throw new Error('此微信已被绑定到其他机器人');
+      throw error;
+    }
+  }
+
+  public async updateOne(where: any, data: any) {
+    try {
+      const model = await this.model.upsert({ where, update: data, create: data });
+      return model;
+    } catch (error) {
+      if (error.code === 'P2002') throw new Error('此微信已被绑定到其他机器人');
+      throw error;
+    }
   }
 }

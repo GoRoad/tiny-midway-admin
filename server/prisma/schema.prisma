@@ -254,10 +254,10 @@ model AIBot {
   wxId       String        @unique
   // 关联对话模型
   model      AIModelConfig @relation("AIBotAIModel", fields: [modelId], references: [id])
-  modelId    Int           @unique
+  modelId    Int           
   // 关联嵌入模型
   emModel    AIModelConfig? @relation("AIBotAIModelEm", fields: [emModelId], references: [id])
-  emModelId  Int?           @unique
+  emModelId  Int?           
 
   @@map("ai_bot")
 }
