@@ -88,10 +88,13 @@ export class WxMessageService {
         const [_fromId] = text.split(':');
         data.fromId = _fromId;
       } else if (isSendRoom) {
+        // 自己发群里的信息，收信人改为自己
         data.groupId = msg.toId;
+        data.toId = msg.fromId;
       } else {
         data.fromId = msg.fromId;
       }
+      // console.log('@调试', msg, data);
       // 企业微信无法获取信息
       if (data.fromId.endsWith('@openim')) return console.log('企微无法获取信息')
       try {
