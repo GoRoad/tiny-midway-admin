@@ -85,4 +85,17 @@ export class DictService {
     })
     return res
   }
+  
+  async openaiSubTypes() {
+    return [
+      { value: 1, label: '对话' },
+      { value: 2, label: '嵌入' },
+      { value: 3, label: '视觉' },
+      { value: 4, label: '视频' },
+      { value: 5, label: '语音' },
+      { value: 6, label: '生图' },
+      { value: 7, label: 'tools' },
+      { value: 8, label: '排序' },
+    ]
+  }
 }

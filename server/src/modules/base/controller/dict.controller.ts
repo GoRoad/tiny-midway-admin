@@ -35,4 +35,10 @@ export class DictController {
   async getWxUserDict() {
     return this.dictService.getWxUserDict()
   }
+
+  // 获取ai能力字典
+  @Get('/openai/sub-types')
+  async getOpenaiSubTypes() {
+    return this.dictService.openaiSubTypes()
+  }
 }

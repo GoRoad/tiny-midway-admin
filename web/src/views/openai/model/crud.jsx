@@ -104,7 +104,7 @@ export default function ({ crudExpose, context }) {
           // crud自定义字段，效果就是在添加和编辑时都看不到这个字段
           readonly: true,
           column: { //表格列的一些配置
-            width: 80,
+            width: 70,
             sorter: 'custom', // 排序
           }
         },
@@ -123,6 +123,9 @@ export default function ({ crudExpose, context }) {
           form: {
             rule: [{ required: true, message: '请输入内容', trigger: 'blur' }],
           },
+          column: {
+            width: 150,
+          }
         },
         type: {
           title: "模型类型",
@@ -139,6 +142,24 @@ export default function ({ crudExpose, context }) {
               { value:'local', label:'本地模型' },
             ]
           }),
+        },
+        subType: {
+          title: '模型能力',
+          search: {
+            show: true,
+            rules: null,
+          },
+          type: 'dict-select',
+          dict: dict({
+            url: '/base/dict/openai/sub-types',
+          }),
+          form: {
+            component: {
+              helper: '给模型进行功能标记，请按照模型实际能力勾选',
+              multiple: true,
+            },
+            rule: [{ required: true, message: '请选择一个模型能力' }],
+          },
         },
         apiKey: {
           title: '密钥',
@@ -166,12 +187,15 @@ export default function ({ crudExpose, context }) {
         },
         model: {
           title: '基础模型',
+          type: 'text',
           form: {
             value: 'gpt-3.5',
             helper: '如：gpt-3.5，基础模型需要与供应商的模型名称一致',
             rule: [{ required: true, message: '请输入内容', trigger: 'blur' }],
           },
-          type: 'text',
+          column: {
+            ellipsis: true,
+          }
         },
         temperature: {
           title: '温度',
@@ -214,19 +238,19 @@ export default function ({ crudExpose, context }) {
             },
           },
         },
-        createTime: {
-          title: '创建时间',
-          type: 'text',
-          addForm: { show: false },
-          column: {
-            formatter({ value, row, i }) {
-              return formatDate(value)
-            },
-          },
-          form: {
-            component: { disabled: true }
-          }
-        },
+        // createTime: {
+        //   title: '创建时间',
+        //   type: 'text',
+        //   addForm: { show: false },
+        //   column: {
+        //     formatter({ value, row, i }) {
+        //       return formatDate(value)
+        //     },
+        //   },
+        //   form: {
+        //     component: { disabled: true }
+        //   }
+        // },
         // updateTime: {
         //   title: '更新时间',
         //   type: 'text',

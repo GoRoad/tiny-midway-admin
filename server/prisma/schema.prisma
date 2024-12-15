@@ -188,6 +188,7 @@ model AIModelConfig {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   type        String
+  subType     Int[]    @default([])
   apiKey      String
   model       String
   temperature Float?
