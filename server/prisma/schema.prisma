@@ -205,7 +205,7 @@ model WxUser {
   mobile     String?
   nickName   String?
   headImgUrl String?
-  uin        Int?
+  uin        String?
   status     Int // 0离线 1在线
   wxId       String    @unique
   appId      String // 登录设备id

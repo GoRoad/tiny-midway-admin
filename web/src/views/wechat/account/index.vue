@@ -260,7 +260,7 @@ const checkLoginStatus = async () => {
         alias: loginModal.loginInfo.alias,
         mobile: loginModal.loginInfo.mobile,
         nickName: loginModal.loginInfo.nickName,
-        uin: loginModal.loginInfo.uin,
+        uin: loginModal.loginInfo.uin + '',
         wxId: loginModal.loginInfo.wxid,
       }
       await setWxUser(wxInfo)
