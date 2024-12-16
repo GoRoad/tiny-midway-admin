@@ -65,8 +65,8 @@ export class AgentService {
       name: 'searchChatHistory',
       description: `
         查询当前群信息和当前群成员聊天记录的工具:
-        - 不要杜撰信息，请坦诚不知。
-        - 一个任务只能查询一次，严禁重复查询。
+        - 查询条件不变数据也不会有变化，禁止重复查询。
+        - 如果查询结果为空就是没有数据不能重复查询，必须终止退出。
         - 当前发起查询的用户ID: ${wxId}。
         - 群基础信息: 群昵称、群封面、群主信息、群简介、群成员列表（成员昵称，成员头像）。
         - 群成员聊天记录: 可以用群昵称查询记录，返回的记录格式是数组，每个元素是一个对象，包含两个字段：sender（昵称）和 content（内容），例子：[{"sender": "Tom", "content": "Hello"}]。
@@ -84,7 +84,7 @@ export class AgentService {
       // 导入测试历史数据
       const history = await this.historyService.getRagGroupHistory(emModelId, keyword, groupId, sender, starTtime, endTime);
       console.log('@@@history: ', history);
-      return JSON.stringify(history);
+      return JSON.stringify({history});
     }, toolSchema);
   }
 }
