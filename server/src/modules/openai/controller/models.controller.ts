@@ -34,4 +34,11 @@ export class AIModelController extends BaseController {
     // return llm.content;
     return this.service.test(id);
   }
+
+  // 测试嵌入模型联通性
+  @Get('/test/embedding')
+  async testEmbedding(@Query('id') id: number) {
+    const list = await this.service.embedding(id, 'ok');
+    return `向量化长度: ${list?.length}`
+  }
 }

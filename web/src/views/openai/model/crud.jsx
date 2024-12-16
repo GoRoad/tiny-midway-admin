@@ -7,7 +7,6 @@ import { useAuthStore } from '@/store'
 import axios from 'axios'
 
 const _loading = ref(false)
-console.log('_loading: ', _loading);
 
 const { accessToken } = useAuthStore()
 /**
@@ -41,15 +40,15 @@ export const addRequest = async ({ form }) => {
   return await request.post('/openai/model/', form)
 }
 
-const testAi = async (form) => {
+const testApi = async (id, path) => {
   // 不使用拦截器处理code，防止触发框架逻辑
   // 获取完整的http信息用于判断模型接口状态
-  const url = import.meta.env.VITE_AXIOS_BASE_URL + '/openai/model/test'
+  const url = import.meta.env.VITE_AXIOS_BASE_URL + path
   const config = {
     headers: {
       Authorization: `Bearer ${accessToken}`
     },
-    params: {id: form.id},
+    params: {id},
     timeout: 6000,
   }
   try {
@@ -65,6 +64,29 @@ const testAi = async (form) => {
   }
 }
 
+const testAi = async (row) => {
+  testApi(row.id, '/openai/model/test')
+}
+
+const testEmbedding = async (row) => {
+  testApi(row.id, '/openai/model/test/embedding')
+}
+
+
+const createOpt = (row) => {
+  const subType = row?.subType || []
+  console.log('subType: ', subType);
+  const res = [{ label: '对话', key: 'chat' }]
+  subType.forEach(item => {
+    if (item === 2) res.push({ label: '嵌入', key: 'embedding' })
+  })
+  return res
+}
+
+const handleSelect = (key, row) => {
+  if (key === 'chat') testAi(row)
+  if (key === 'embedding') testEmbedding(row)
+}
 
 /**
  * 定义一个CrudOptions生成器方法
@@ -133,13 +155,13 @@ export default function ({ crudExpose, context }) {
           search: { show: true },
           form: {
             value: 'openAi',
-            helper: '不限于OpenAI，使用OpenAI接口格式的模型都能兼容',
+            helper: '如使用兼容OpenAI接口的模型，请选择 兼容OpenAI 类型',
             rule: [{ required: true, message: '请选择', trigger: 'blur' }],
           },
           dict: dict({
             data: [
               { value:'openAi', label:'OpenAi' },
-              { value:'local', label:'本地模型' },
+              { value:'Compatibility', label:'兼容OpenAi' },
             ]
           }),
         },
@@ -178,6 +200,7 @@ export default function ({ crudExpose, context }) {
           form: {
             component: { placeholder: 'https://www.openai.com/v1' },
             rule: [{ required: true, message: '请输入内容', trigger: 'blur' }],
+            helper: '兼容OpenAi 类型有问题可尝试添加 /chat/completions 路径',
           },
           search: { show: false },
           column: {
@@ -229,10 +252,19 @@ export default function ({ crudExpose, context }) {
           column: {
             width: 100,
             render(context) {
-              console.log('context scope', context.row.name);
               return (
                 <div>
-                  <n-button loading={_loading.value} onClick={() => testAi(context.row)}>测试</n-button>
+                  {_loading.value ? (
+                      <n-spin size="small" />
+                    ) : (
+                      <n-dropdown
+                        trigger="hover"
+                        options={createOpt(context.row)}
+                        onSelect={k => handleSelect(k, context.row)}
+                      >
+                        <n-button>测试</n-button>
+                      </n-dropdown>
+                    )}
                 </div>
               );
             },

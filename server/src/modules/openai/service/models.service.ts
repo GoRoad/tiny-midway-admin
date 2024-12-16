@@ -18,14 +18,16 @@ export class AIModelService extends BaseService<AIModelConfig> {
    */
   public async getOpenAIModel(id: number) {
     const aiModel = await this.model.findUnique({ where: { id } });
+    if (!aiModel) throw new Error('模型未配置!');
+    let baseURL = aiModel.baseURL;
+    if (aiModel.type === 'openAi') baseURL += '/chat/completions'
     const modelOptions: ChatOpenAIFields = {
       apiKey: aiModel.apiKey,
       model: aiModel.model,
       temperature: aiModel.temperature,
       maxTokens: aiModel.maxTokens,
       configuration: {
-        // 对话模型接口地址
-        baseURL: aiModel.baseURL + '/chat/completions',
+        baseURL, // 对话模型接口地址
       },
     };
     if (!aiModel.temperature) delete modelOptions.temperature;
@@ -37,6 +39,8 @@ export class AIModelService extends BaseService<AIModelConfig> {
   public async embedding(emModelId: number, text: string) {
     const model = await this.model.findFirst({ where: { id: emModelId } });
     if (!model) throw new Error('向量化模型未配置!');
+    let baseURL = model.baseURL
+    if (model.type === 'openAi') baseURL += '/embeddings' // 添加embeddings模型请求url
     const options = {
       headers: {
         accept: 'application/json',
@@ -51,14 +55,13 @@ export class AIModelService extends BaseService<AIModelConfig> {
       },
       dataType: 'json' as "json" | "text",
     };
-    // 添加embeddings模型请求url
-    const result: any = await makeHttpRequest(model.baseURL + '/embeddings', options);
+    const result: any = await makeHttpRequest(baseURL, options);
     return result.data.data[0].embedding;
   }
 
   public async test(id: number) {
     const model = await this.getOpenAIModel(id);
-    const res = await model.invoke('hi');
+    const res = await model.invoke('你好');
     return res.content;
   }
 }
