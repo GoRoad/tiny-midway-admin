@@ -1,6 +1,7 @@
 import { Provide, Inject } from '@midwayjs/core';
 import { GeweService } from './gewe.service';
 import { AIModelService } from '../../openai/service/models.service';
+import { AgentService } from '../../openai/service/agent.server';
 
 import { Message } from '../class/message.class';
 
@@ -18,6 +19,8 @@ export class WxMessageService {
   geweService: GeweService;
   @Inject()
   aIModelService: AIModelService;
+  @Inject()
+  AgentService: AgentService;
 
   async sendMsg(
     appId: string,
@@ -43,6 +46,19 @@ export class WxMessageService {
         const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
         const res = await chat.invoke(messages);
         this.sendMsg(msg.appid, msg.fromId, res.content.toString());
+
+        // const llm = await this.aIModelService.getOpenAIModel(aiBot.modelId);
+        // // 群聊信息发送人wxid
+        // const [sender] = msg._text.split(':');
+        // const searchParam = {
+        //   llm,
+        //   input: text.slice(3),
+        //   groupId: msg.fromId,
+        //   sender,
+        //   emModelId: aiBot.emModelId,
+        // };
+        // const res = await this.AgentService.wxGroupAgent(searchParam);
+        // this.sendMsg(msg.appid, msg.fromId, res);
       }
     } else if (!msg._self) {
       const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
@@ -141,8 +157,8 @@ export class WxMessageService {
     // 过滤出不存在的
     const missIds = _ids.filter(id => !idsSet.has(id));
     if (missIds.length > 0) {
-      const contacts = groupId ? 
-        await this.geweService.roomMemberInfo(appId, groupId, missIds) : 
+      const contacts = groupId ?
+        await this.geweService.roomMemberInfo(appId, groupId, missIds) :
         await this.geweService.contactsInfo(appId, missIds);
       const data = contacts.map(item => {
         if (!item.userName) {
