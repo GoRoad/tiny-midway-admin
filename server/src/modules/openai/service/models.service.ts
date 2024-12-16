@@ -24,7 +24,8 @@ export class AIModelService extends BaseService<AIModelConfig> {
       temperature: aiModel.temperature,
       maxTokens: aiModel.maxTokens,
       configuration: {
-        baseURL: aiModel.baseURL,
+        // 对话模型接口地址
+        baseURL: aiModel.baseURL + '/chat/completions',
       },
     };
     if (!aiModel.temperature) delete modelOptions.temperature;
@@ -50,7 +51,8 @@ export class AIModelService extends BaseService<AIModelConfig> {
       },
       dataType: 'json' as "json" | "text",
     };
-    const result: any = await makeHttpRequest(model.baseURL, options);
+    // 添加embeddings模型请求url
+    const result: any = await makeHttpRequest(model.baseURL + '/embeddings', options);
     return result.data.data[0].embedding;
   }
 
