@@ -83,7 +83,7 @@ export class AgentService {
       const { keyword, sender, starTtime, endTime } = input;
       // 导入测试历史数据
       const history = await this.historyService.getRagGroupHistory(emModelId, keyword, groupId, sender, starTtime, endTime);
-      console.log('history: ', history);
+      console.log('@@@history: ', history);
       return JSON.stringify(history);
     }, toolSchema);
   }
