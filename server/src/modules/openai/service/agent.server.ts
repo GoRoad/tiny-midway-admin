@@ -34,12 +34,13 @@ export class AgentService {
           'system', `
           - 你是一个乐于助人的助手，你处在一个聊天群组内部。
           - 如果现有条件下你能回答群成员问题，请直接回答。如果你需要额外信息可以调用合适的工具。
-          - 可以使用工具查询成员ID、昵称的那个详细信息，然后用群成员ID查询聊天记录。
+          - 如果缺少需要查询的成员ID信息，你可以先调用 getGroupAndMemberInfo 工具查询成员ID、昵称等详细信息，然后调用 searchChatHistory 再来查询他的聊天记录。
           - 如果无法确定答案，请坦承不知。
-          - 问题背景信息：当前时间：${new Date().toLocaleString()}，我的群成员ID: ${sender}，所在聊天群ID:${groupId}。
+          - 问题背景信息：当前时间：${new Date().toLocaleString()}，提问人的群成员ID: ${sender}，提问人所在聊天群ID:${groupId}。
           - 请使用中文回答，除非成员要求使用其它语言。
           - 如果某工具返回结果为没有实际意义(比如空字符串、空对象、空数组)就是没有数据，禁止再次使用相同参数调用工具。
           - 如果某工具返回结果不符合预期可能是数据有误，禁止再次使用相同参数调用工具。
+          - 返回的数据格式化成Markdown
           `
         ],
         ['placeholder', '{chat_history}'],
@@ -92,9 +93,9 @@ export class AgentService {
       schema: z.object({
         keyword: z.string().optional().describe('搜索聊天内容的关键字, 如果搜索全部信息就不传'),
         sender: z.string().optional().describe('查询成员的聊天记录传成员ID，如果查询所有成员就不传'),
-        starTtime: z.string().optional().default(defStartTime).describe('开始时间，格式为 yyyy-MM-dd HH:mm:ss，没有指定不传'),
-        endTime: z.string().optional().default(defEndTime).describe('结束时间,按天查询的话时分秒应该为23:59:59，格式为 yyyy-MM-dd HH:mm:ss，没有指定不传'),
-      }).describe('通过成员ID，内容关键字，群ID来搜索群内的聊天记录')
+        starTtime: z.string().optional().default(defStartTime).describe('开始时间，格式为 yyyy-MM-dd HH:mm:ss，没有指定时间不传'),
+        endTime: z.string().optional().default(defEndTime).describe('结束时间,按天查询的话时分秒应该为23:59:59，格式为 yyyy-MM-dd HH:mm:ss，没有指定时间不传'),
+      }).describe('通过成员ID，聊天内容关键字，群ID来搜索群内的聊天记录，不支持其他的查询条件')
     }
     return tool(async (input) => {
       console.log('@ai入参 rag: ', input);
@@ -117,7 +118,7 @@ export class AgentService {
       `,
       schema: z.object({
         groupId: z.string().describe('需要查询的群ID，文本类型，例子 "123@chatroom" '),
-        sender: z.string().optional().describe('需要查询的成员ID，文本类型，例子 "abc123" '),
+        sender: z.string().optional().describe('需要查询的成员ID，文本类型，例子 "abc123"，如果传递昵称，可以不传成员ID '),
         nickName: z.string().describe('需要查询的成员昵称，文本类型，例子 "张国荣" '),
       }).describe('使用已知信息来查询群或者群成员详细信息')
     }
