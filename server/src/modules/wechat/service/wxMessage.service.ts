@@ -34,23 +34,23 @@ export class WxMessageService {
     return result.data;
   }
 
-  async handleTextMsg(msg: Message) {
+  async handleTextMsg(msg: Message): Promise<string> {
     // 检查是否配置了机器人
     const aiBot = await this.prisma.aIBot.findFirst({ where: { wxId: msg.wxid } });
-    if (!aiBot) return console.log('未配置机器人，不处理消息', msg._pushContent);
-    if (aiBot.useDataSource) this.saveChatHistory(msg, aiBot.emModelId);
+    if (!aiBot) return '请先配置AI机器人！';
     const text = msg.text();
     const messages = [new SystemMessage(aiBot.prompt), new HumanMessage(text)];
     if (msg.isRoom) {
       if (text.startsWith('ai ')) {
         // const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
         // const res = await chat.invoke(messages);
-        // this.sendMsg(msg.appid, msg.fromId, res.content.toString());
+        // return this.sendMsg(msg.appid, msg.fromId, res.content.toString());
 
         const llm = await this.aIModelService.getOpenAIModel(aiBot.modelId);
         // 群聊信息发送人wxid
         const [sender] = msg._text.split(':');
         const searchParam = {
+          appId: msg.appid,
           llm,
           input: text.slice(3),
           groupId: msg.fromId,
@@ -58,13 +58,15 @@ export class WxMessageService {
           emModelId: aiBot.emModelId,
         };
         const res = await this.AgentService.wxGroupAgent(searchParam);
-        this.sendMsg(msg.appid, msg.fromId, res);
+        return this.sendMsg(msg.appid, msg.fromId, JSON.stringify(res));
       }
     } else if (!msg._self) {
       const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
       const res = await chat.invoke(messages);
-      this.sendMsg(msg.appid, msg.fromId, res.content.toString());
+      return this.sendMsg(msg.appid, msg.fromId, res.content.toString());
     }
+    // 发给ai的指令不用入库
+    if (aiBot.useDataSource) this.saveChatHistory(msg, aiBot.emModelId);
   }
 
   async handleMessage(msg: Message) {
