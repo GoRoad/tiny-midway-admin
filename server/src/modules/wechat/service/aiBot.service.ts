@@ -17,8 +17,8 @@ export class AIBotService extends BaseService<AIBot> {
       const model = await this.model.create({
         data: {
           name: data.name,
-          description: data.name,
-          prompt: data.name,
+          description: data.description,
+          prompt: data.prompt,
           useDataSource: data.useDataSource,
           // workflow: data.workflowId ? { connect: { id: data.workflowId } } : undefined,
           wx: data.wxId ? { connect: { wxId: data.wxId } } : undefined,
