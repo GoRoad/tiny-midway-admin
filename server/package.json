@@ -4,6 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "@langchain/langgraph": "^0.2.34",
     "@langchain/openai": "^0.3.14",
     "@midwayjs/bootstrap": "^3.18.2",
     "@midwayjs/busboy": "^3.18.2",

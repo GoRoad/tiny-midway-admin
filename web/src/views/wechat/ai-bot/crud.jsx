@@ -115,7 +115,7 @@ export default function ({ crudExpose, context }) {
           }
         },
         useDataSource: {
-          title: "读取聊天记录",
+          title: "存取聊天记录",
           type: 'dict-switch',
           form: {
             col: { span: 14 }

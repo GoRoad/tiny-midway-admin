@@ -58,7 +58,7 @@ export class WxMessageService {
           emModelId: aiBot.emModelId,
         };
         const res = await this.AgentService.wxGroupAgent(searchParam);
-        return this.sendMsg(msg.appid, msg.fromId, JSON.stringify(res));
+        return this.sendMsg(msg.appid, msg.fromId, res);
       }
     } else if (!msg._self) {
       const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
