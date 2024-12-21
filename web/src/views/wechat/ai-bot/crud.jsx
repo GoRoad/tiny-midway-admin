@@ -3,6 +3,7 @@ import { dict, compute } from "@fast-crud/fast-crud";
 import { formatDate, createPermissionOpt } from "@/utils";
 
 import { ref } from "vue";
+import * as _ from "lodash";
 
 
 /**
@@ -36,10 +37,38 @@ export const addRequest = async ({ form }) => {
   return await request.post("/wechat/ai-bot/", form);
 };
 
+const validateArr = async (rule, value) => {
+  if (!value) throw new Error("请选择用户的角色!");
+};
+
+function useSearchRemote(url) {
+  let lastFetchId = 0;
+
+  const state = {
+    data: ref([]),
+    loading: ref(false),
+  };
+
+  const fetch = _.debounce(async (value) => {
+    lastFetchId += 1;
+    const fetchId = lastFetchId;
+    state.data.value = [];
+    state.loading.value = true;
+    const { data } = await request.get(url, { params: { q: value } });
+    if (fetchId !== lastFetchId) return;
+    state.data.value = data;
+    state.loading.value = false;
+  }, 800);
+
+  return { fetch, state };
+}
+
 /**
  * 定义一个CrudOptions生成器方法
  */
 export default function ({ crudExpose, context }) {
+  const { fetch: fetchUser, state: userState } = useSearchRemote('/base/dict/wechat/wx-contact-filter');
+  const { fetch: fetchGroup, state: groupState } = useSearchRemote('/base/dict/wechat/wx-group-filter');
   const opt = {
     crudOptions: {
       request: {
@@ -72,7 +101,7 @@ export default function ({ crudExpose, context }) {
           },
           form: {
             rule: [{ required: true, message: "请输入名称", trigger: "blur" }],
-            col: { span: 14 },
+            // col: { span: 14 },
           },
           column: {
             width: 120,
@@ -89,8 +118,9 @@ export default function ({ crudExpose, context }) {
             url: '/base/dict/wechat/wx-user',
           }),
           form: {
-            rule: [{ required: true, message: '请选择一个微信号' }],
-            col: { span: 14 },
+            helper: '只有绑定微信后ai才会生效',
+            // rule: [{ required: true, message: '请选择一个微信号' }],
+            // col: { span: 14 },
           },
           column: {
             width: 160,
@@ -108,7 +138,7 @@ export default function ({ crudExpose, context }) {
           }),
           form: {
             rule: [{ required: true, message: '请选择一个AI模型' }],
-            col: { span: 14 },
+            // col: { span: 14 },
           },
           column: {
             width: 160,
@@ -118,7 +148,7 @@ export default function ({ crudExpose, context }) {
           title: "存取聊天记录",
           type: 'dict-switch',
           form: {
-            col: { span: 14 }
+            // col: { span: 14 }
           },
           dict: dict({
             data: [
@@ -139,17 +169,104 @@ export default function ({ crudExpose, context }) {
             url: '/base/dict/openai/models',
           }),
           form: {
-            helper: '用于向量化聊天记录并存储',
+            helper: '用于向量化聊天记录的存储和搜索',
             show: compute(({ form }) => {
               const show = form?.useDataSource
               return !!show;
             }),
             rule: [{ required: true, message: '请选择一个AI模型' }],
-            col: { span: 14 },
+            // col: { span: 14 },
           },
           column: {
             width: 160,
           }
+        },
+        singleChatPrefix: {
+          title: "触发关键字",
+          type: "text",
+          form: {
+            // rule: [{ required: true, message: "请输入关键字", trigger: "change" }],
+          },
+          column: { show: false },
+        },
+        singleListMode: {
+          title: "名单模式",
+          type: 'dict-radio',
+          form: {
+            value: 1,
+          },
+          dict: dict({
+            data: [
+              { value: 1, label: '黑名单' },
+              { value: 2, label: '白名单' },
+            ],
+          }),
+          column: { show: false }
+        },
+        singleListId: {
+          title: '名单',
+          type: 'dict-select',
+          column: { show: false },
+          form: {
+            col: { span: 20 },
+            component: {
+              name: 'fs-dict-select',
+              multiple: true,
+              filterable: true,
+              remote: true,
+              'reserve-keyword': true,
+              placeholder: '输入昵称搜索联系人',
+              options: userState.data,
+              onSearch: (query) => {
+                fetchUser(query);
+              },
+              loading: userState.loading,
+            },
+          },
+        },
+        groupChatPrefix: {
+          title: "触发关键字",
+          type: "text",
+          form: {
+            value: 'ai ',
+            // rule: [{ required: true, message: "请输入关键字", trigger: "change" }],
+          },
+          column: { show: false },
+        },
+        groupListMode: {
+          title: "名单模式",
+          type: 'dict-radio',
+          form: {
+            value: 1,
+          },
+          dict: dict({
+            data: [
+              { value: 1, label: '黑名单' },
+              { value: 2, label: '白名单' },
+            ],
+          }),
+          column: { show: false }
+        },
+        groupListId: {
+          title: '名单',
+          type: 'dict-select',
+          column: { show: false },
+          form: {
+            col: { span: 20 },
+            component: {
+              name: 'fs-dict-select',
+              multiple: true,
+              filterable: true,
+              remote: true,
+              'reserve-keyword': true,
+              placeholder: '输入群名称搜索微信群',
+              options: groupState.data,
+              onSearch: (query) => {
+                fetchGroup(query);
+              },
+              loading: groupState.loading,
+            },
+          },
         },
         // workflowId: {
         //   title: "工作流",
@@ -174,7 +291,7 @@ export default function ({ crudExpose, context }) {
           type: "text",
           form: {
             component: { type: "textarea", clearable: false },
-            col: { span: 14 },
+            col: { span: 18 },
           },
           column: {
             ellipsis: true,
@@ -185,7 +302,7 @@ export default function ({ crudExpose, context }) {
           type: "text",
           form: {
             component: { type: "textarea", rows: 15, clearable: false },
-            col: { span: 14 },
+            col: { span: 18 },
           },
           column: {
             show: false,
@@ -254,18 +371,72 @@ export default function ({ crudExpose, context }) {
         },
       },
       form: {
-        labelWidth: "120px",
+        labelWidth: "160px",
         wrapper: {
           draggable: false,
           is: "n-drawer",
           width: 400,
-          onClosed(e) {
-            console.log("onClosed", e);
-          },
-          onOpened(e) {
-            console.log("onOpened", e);
-          },
+          // onClosed(e) {
+          //   console.log("onClosed", e);
+          // },
+          // onOpened(e) {
+          //   console.log("onOpened", e);
+          // },
         },
+        group: {
+          groupType: 'tabs',
+          accordion: false,
+          groups: {
+            base: {
+              tab: '基础设置',
+              columns: ['id', 'name', 'wxId', 'modelId', 'useDataSource', 'emModelId', 'description', 'prompt'],
+              slots: {
+                tab: (scope) => {
+                  return (
+                    <span style={{ color: scope.hasError ? 'red' : 'green' }}>
+                      <div class="flex items-center">
+                        <p class="mr-5">基础设置</p>
+                        <i class={'i-material-symbols:check-circle-outline text-16'} />
+                      </div>
+                    </span>
+                  );
+                },
+              },
+            },
+            singleChat: {
+              tab: '私聊设置',
+              columns: ['singleChatPrefix', 'singleListMode', 'singleListId'],
+              slots: {
+                tab: (scope) => {
+                  return (
+                    <span style={{ color: scope.hasError ? 'red' : 'green' }}>
+                      <div class="flex items-center">
+                        <p class="mr-5">私聊设置</p>
+                        <i class={'i-material-symbols:error-outline text-16'} />
+                      </div>
+                    </span>
+                  );
+                },
+              },
+            },
+            groupChat: {
+              tab: '群聊设置',
+              columns: ['groupChatPrefix', 'groupListMode', 'groupListId'],
+              slots: {
+                tab: (scope) => {
+                  return (
+                    <span style={{ color: scope.hasError ? 'red' : 'green' }}>
+                      <div class="flex items-center">
+                        <p class="mr-5">群聊设置</p>
+                        <i class={'i-material-symbols:error-outline text-16'} />
+                      </div>
+                    </span>
+                  );
+                },
+              },
+            },
+          }
+        }
       },
     },
   };

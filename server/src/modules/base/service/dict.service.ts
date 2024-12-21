@@ -106,4 +106,32 @@ export class DictService {
       { value: 8, label: '排序' },
     ]
   }
+
+  async getWxContactFilterDict(q: string = undefined) {
+    const data = await this.prisma.wxContact.findMany({
+      where: {
+        nickName: {
+          contains: q,
+        },
+      },
+    });
+    const res = data.map(item => {
+      return { value: item.id, label: item.nickName }
+    })
+    return res
+  }
+
+  async getWxGroupFilterDict(q: string = undefined) {
+    const data = await this.prisma.wxGroup.findMany({
+      where: {
+        nickName: {
+          contains: q,
+        },
+      },
+    });
+    const res = data.map(item => {
+      return { value: item.id, label: item.nickName }
+    })
+    return res
+  }
 }

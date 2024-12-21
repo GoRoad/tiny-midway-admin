@@ -66,9 +66,9 @@ export class AgentService {
       let res = response.output;
       console.log('res: ', typeof res, res);
       if (typeof res === 'string') {
-        return res;
+        return { content: res };
       } else {
-        return JSON.stringify(res);
+        return { content: JSON.stringify(res) };
       }
     } catch (error) {
       console.error('@agent error: ', error);
@@ -145,6 +145,7 @@ export class AgentService {
       description: `
         查询聊天群内的聊天记录:
         - **只能通过成员ID进行查询，不支持昵称查询。**
+        - 查询时间默认起止时间为1天前00:00:01到当前时间。
         - 查询时间最大只能7天范围内，如果查询条件为全部、所有、一切等时间条件，那么起止时间为7天前00:00:01到当前时间。
         - 群成员聊天记录: 返回的记录格式是数组，每个元素是一个对象，
           包含字段：sender_id（群id）sender_id（发信方昵称）sender_nickName（发信方昵称）和 content（内容），postTime（发送时间）sender_id（收信方昵称）sender_nickName（收信方昵称）

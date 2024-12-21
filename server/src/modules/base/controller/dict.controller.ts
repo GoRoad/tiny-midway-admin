@@ -47,4 +47,16 @@ export class DictController {
   async getOpenAiModels() {
     return this.dictService.aiModelDict()
   }
+
+  // 筛选微信联系人
+  @Get('/wechat/wx-contact-filter')
+  async getWxContactDict(@Query('q') q: string) {
+    return this.dictService.getWxContactFilterDict(q)
+  }
+
+  // 筛选微信联系人
+  @Get('/wechat/wx-group-filter')
+  async getWxGroupDict(@Query('q') q: string) {
+    return this.dictService.getWxGroupFilterDict(q)
+  }
 }
