@@ -240,24 +240,32 @@ model AIBot {
   name          String // 智能体名称
   description   String? // 简介，可选
   prompt        String? // 人设与回复逻辑，可选
-  plugins       String[] @default([]) // 插件列表，默认为空数组
-  useDataSource Boolean? // 数据源权限
-  dataSource    String[] @default([]) // 可以使用的聊天记录微信id、群id
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  plugins       String[] @default([]) // 插件id列表，默认为空数组
+  useDataSource Boolean? // 是否有权存取聊天记录
+
+  singleChatPrefix String? // 私聊触发机器人的文本信息前缀
+  singleListMode   Int // 私聊名单名单模式 1 黑名单 2 白名单
+  singleListId     String[] // 私聊名单
+
+  groupChatPrefix String? // 群聊触发机器人的文本信息前缀
+  groupListMode   Int // 群聊名单名单模式 1 黑名单 2 白名单
+  groupListId     String[] // 群聊名单
 
   // 关联表
   workflow   Workflow?      @relation("AIBotWorkflows", fields: [workflowId], references: [id])
   workflowId Int?
   // 关联一个微信号
-  wx         WxUser        @relation("AIBotWxUsers", fields: [wxId], references: [wxId])
-  wxId       String        @unique
+  wx         WxUser?        @relation("AIBotWxUsers", fields: [wxId], references: [wxId])
+  wxId       String?        @unique
   // 关联对话模型
-  model      AIModelConfig @relation("AIBotAIModel", fields: [modelId], references: [id])
-  modelId    Int           
+  model      AIModelConfig? @relation("AIBotAIModel", fields: [modelId], references: [id])
+  modelId    Int?
   // 关联嵌入模型
   emModel    AIModelConfig? @relation("AIBotAIModelEm", fields: [emModelId], references: [id])
-  emModelId  Int?           
+  emModelId  Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("ai_bot")
 }

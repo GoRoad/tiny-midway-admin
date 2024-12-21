@@ -22,3 +22,8 @@ $ npx prisma generate
 $ npx prisma db pull
 $ npx prisma db push
 ```
+### 数据库创建向量类型
+```sql
+-- 设置 vector
+CREATE EXTENSION IF NOT EXISTS vector;
+```

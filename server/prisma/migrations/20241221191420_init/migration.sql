@@ -1,6 +1,3 @@
--- 设置 vector
-CREATE EXTENSION IF NOT EXISTS vector;
-
 -- CreateTable
 CREATE TABLE "casbin_rule" (
     "id" SERIAL NOT NULL,
@@ -166,6 +163,7 @@ CREATE TABLE "ai_model_config" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "subType" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     "apiKey" TEXT NOT NULL,
     "model" TEXT NOT NULL,
     "temperature" DOUBLE PRECISION,
@@ -184,7 +182,7 @@ CREATE TABLE "wx_user" (
     "mobile" TEXT,
     "nickName" TEXT,
     "headImgUrl" TEXT,
-    "uin" INTEGER,
+    "uin" TEXT,
     "status" INTEGER NOT NULL,
     "wxId" TEXT NOT NULL,
     "appId" TEXT NOT NULL,
@@ -216,11 +214,18 @@ CREATE TABLE "ai_bot" (
     "prompt" TEXT,
     "plugins" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "useDataSource" BOOLEAN,
-    "dataSource" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "singleChatPrefix" TEXT,
+    "singleListMode" INTEGER NOT NULL,
+    "singleListId" TEXT[],
+    "groupChatPrefix" TEXT,
+    "groupListMode" INTEGER NOT NULL,
+    "groupListId" TEXT[],
+    "workflowId" INTEGER,
+    "wxId" TEXT,
+    "modelId" INTEGER,
+    "emModelId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "workflowId" INTEGER,
-    "wxId" INTEGER,
 
     CONSTRAINT "ai_bot_pkey" PRIMARY KEY ("id")
 );
@@ -315,6 +320,9 @@ CREATE UNIQUE INDEX "ai_model_config_name_key" ON "ai_model_config"("name");
 CREATE UNIQUE INDEX "wx_user_wxId_key" ON "wx_user"("wxId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ai_bot_wxId_key" ON "ai_bot"("wxId");
+
+-- CreateIndex
 CREATE INDEX "wx_message_wxId_idx" ON "wx_message"("wxId");
 
 -- CreateIndex
@@ -354,7 +362,13 @@ ALTER TABLE "file" ADD CONSTRAINT "file_categoryId_fkey" FOREIGN KEY ("categoryI
 ALTER TABLE "ai_bot" ADD CONSTRAINT "ai_bot_workflowId_fkey" FOREIGN KEY ("workflowId") REFERENCES "workflow"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ai_bot" ADD CONSTRAINT "ai_bot_wxId_fkey" FOREIGN KEY ("wxId") REFERENCES "wx_user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ai_bot" ADD CONSTRAINT "ai_bot_wxId_fkey" FOREIGN KEY ("wxId") REFERENCES "wx_user"("wxId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ai_bot" ADD CONSTRAINT "ai_bot_modelId_fkey" FOREIGN KEY ("modelId") REFERENCES "ai_model_config"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ai_bot" ADD CONSTRAINT "ai_bot_emModelId_fkey" FOREIGN KEY ("emModelId") REFERENCES "ai_model_config"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "wx_message" ADD CONSTRAINT "wx_message_fromId_fkey" FOREIGN KEY ("fromId") REFERENCES "wx_contact"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
