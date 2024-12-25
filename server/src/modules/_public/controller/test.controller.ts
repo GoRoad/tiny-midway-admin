@@ -1,5 +1,7 @@
 import { Controller, UseGuard, Get, Inject, Query, Param } from '@midwayjs/core';
 import { CasbinService } from '../../base/service/casbin.service';
+import { QueueService } from '../../base/service/queue.service';
+import { GeweService } from '../../wechat/service/gewe.service';
 import { AIModelService } from '../../openai/service/models.service';
 // import { PrismaClient } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
@@ -11,11 +13,15 @@ import * as fs from "fs";
 @UseGuard(EnvGuard)
 export class HomeController {
   @Inject()
+  prisma: PrismaClient;
+  @Inject()
   casbinService: CasbinService;
   @Inject()
   aIModelService: AIModelService;
   @Inject()
-  prisma: PrismaClient;
+  queueService: QueueService;
+  @Inject()
+  geweService: GeweService;
 
   @Get('/')
   async index(): Promise<any> {
@@ -125,5 +131,38 @@ export class HomeController {
     ];
     const res = await chat.invoke(messages);
     return res.content;
+  }
+
+  @Get('/queue')
+  async test2(): Promise<any> {
+    return this.queueService.addTask('test', async () => {
+      const data = await this.geweService.roomMemberList('0', '0@chatroom');
+      const list = data.memberList
+      await this.prisma.wxContact.createMany({
+        data: list.map(item => {
+          return {
+            id: item.wxid,
+            nickName: item.nickName,
+            bigHeadImgUrl: item.bigHeadImgUrl,
+            smallHeadImgUrl: item.smallHeadImgUrl,
+          }
+        }),
+        skipDuplicates: true
+      });
+      await this.prisma.wxGroup.update({
+        where: { id: '0@chatroom' },
+        data: {
+          contacts: {
+            connect: list.map(item => ({ id: item.wxid }))
+          }
+        }
+      });
+      return this.prisma.wxGroup.findFirst({
+        where: { id: '0@chatroom' },
+        include: {
+          contacts: true
+        }
+      });
+    });
   }
 }

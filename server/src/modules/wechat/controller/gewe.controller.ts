@@ -80,4 +80,16 @@ export class GeweController {
   async getRoomMemberInfo(@Body('appId') appId: string, @Body('chatroomId') chatroomId: string , @Body('memberWxids') memberWxids: string[]): Promise<any> {
     return this.geweService.roomMemberInfo(appId, chatroomId, memberWxids);
   }
+
+  /**
+   * 获取聊天室成员列表
+   *
+   * @param appId 应用ID
+   * @param chatroomId 聊天室ID
+   * @returns 返回聊天室成员列表
+   */
+  @Post('/group/getChatroomMemberList')
+  async getRoomMemberList(@Body('appId') appId: string, @Body('chatroomId') chatroomId: string): Promise<any> {
+    return this.geweService.roomMemberList(appId, chatroomId);
+  }
 }

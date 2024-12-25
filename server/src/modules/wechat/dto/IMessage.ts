@@ -156,3 +156,19 @@ export interface Contact {
   city: string;
   phoneNumList: any[] | null;
 }
+
+interface GroupMember {
+  wxid: string; // 微信ID
+  nickName: string; // 昵称
+  inviterUserName: string; // 邀请人用户名
+  memberFlag: number; // 成员标志
+  displayName: string | null; // 在本群内的昵称（可能为空）
+  bigHeadImgUrl: string; // 大头像URL
+  smallHeadImgUrl: string; // 小头像URL
+}
+
+export interface GroupMembers {
+  memberList: GroupMember[];
+  chatroomOwner: string; // 群主的wxid
+  adminWxid: any[]; // 管理的wxid
+}

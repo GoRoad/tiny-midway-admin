@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@midwayjs/core';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { Contact } from '../dto/IMessage';
+import { Contact, GroupMembers } from '../dto/IMessage';
 import * as _ from 'lodash';
 
 @Provide()
@@ -162,6 +162,12 @@ export class GeweService {
   // 获取群友详细信息
   async roomMemberInfo(appId: string, chatroomId: string, memberWxids: string[]) {
     const result: Contact[] = await this.request('POST', '/group/getChatroomMemberDetail', { appId, chatroomId, memberWxids });
+    return result;
+  }
+
+  // 获取群成员列表
+  async roomMemberList(appId: string, chatroomId: string) {
+    const result: GroupMembers = await this.request('POST', '/group/getChatroomMemberList', { appId, chatroomId });
     return result;
   }
 }
