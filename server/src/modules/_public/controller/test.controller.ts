@@ -136,33 +136,7 @@ export class HomeController {
   @Get('/queue')
   async test2(): Promise<any> {
     return this.queueService.addTask('test', async () => {
-      const data = await this.geweService.roomMemberList('0', '0@chatroom');
-      const list = data.memberList
-      await this.prisma.wxContact.createMany({
-        data: list.map(item => {
-          return {
-            id: item.wxid,
-            nickName: item.nickName,
-            bigHeadImgUrl: item.bigHeadImgUrl,
-            smallHeadImgUrl: item.smallHeadImgUrl,
-          }
-        }),
-        skipDuplicates: true
-      });
-      await this.prisma.wxGroup.update({
-        where: { id: '0@chatroom' },
-        data: {
-          contacts: {
-            connect: list.map(item => ({ id: item.wxid }))
-          }
-        }
-      });
-      return this.prisma.wxGroup.findFirst({
-        where: { id: '0@chatroom' },
-        include: {
-          contacts: true
-        }
-      });
+      return 'test';
     });
   }
 }

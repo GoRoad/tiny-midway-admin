@@ -2,6 +2,7 @@ import { Provide, Inject } from '@midwayjs/core';
 import { GeweService } from './gewe.service';
 import { AIModelService } from '../../openai/service/models.service';
 import { AgentService } from '../../openai/service/agent.server';
+import { QueueService } from '../../base/service/queue.service';
 
 import { Message } from '../class/message.class';
 
@@ -21,6 +22,8 @@ export class WxMessageService {
   aIModelService: AIModelService;
   @Inject()
   AgentService: AgentService;
+  @Inject()
+  queueService: QueueService;
 
   async sendMsg(
     appId: string,
@@ -122,16 +125,35 @@ export class WxMessageService {
       // 企业微信无法获取信息
       if (data.fromId.endsWith('@openim')) return console.log('企微无法获取信息')
       try {
-        const store = await this.prisma.$transaction(async client => {
+        const { store, gid } = await this.prisma.$transaction(async client => {
+          const result = {
+            store: null,
+            uid: null,
+            gid: null
+          };
           // 检查发信人、收信人是否存在，否则自动入库
-          await this.addContactsIfMiss(data.appId, [data.fromId, data.toId], client, data.groupId);
+          const uIds = await this.addContactsIfMiss(data.appId, [data.fromId, data.toId], client, data.groupId);
+          result.uid = uIds[0];
           // 检查群数据是否存在，否则自动入库
-          if (data.groupId) await this.addGroupIfMiss(msg.appid, [data.groupId], client);
+          if (data.groupId) {
+            // 返回入库的群id列表
+            const gIds = await this.addGroupIfMiss(msg.appid, [data.groupId], client);
+            result.gid = gIds[0];
+          }
           // 入库
-          return await client.wxMessage.create({ data });
+          result.store = await client.wxMessage.create({ data });
+          return result
         });
+        // 更新向量化数据到聊天记录表，用于检索
         const res = await this.addEmbeddingText(store.id, store.content, emModelId)
         console.log('@入库成功: ', store.pushContent, res);
+        // 新入库的群，需要全量更新群成员信息
+        if (data.groupId && gid) {
+          // 耗时任务使用队列维护群信息，需要先有群信息，否则不会更新
+          this.queueService.addTask('updateGroup', async () => {
+            this.updateGroupMembers(msg.appid, data.groupId).then(() => console.log('更新群成员'));
+          });
+        }
       } catch (error) {
         console.error(error);
       }
@@ -183,7 +205,7 @@ export class WxMessageService {
       });
       await prisma.wxContact.createMany({ data });
     }
-    return true;
+    return missIds;
   }
 
   async addGroupIfMiss(appId: string, ids: string[], prisma: OmitPrismaClient) {
@@ -214,6 +236,36 @@ export class WxMessageService {
       });
       await prisma.wxGroup.createMany({ data });
     }
-    return true;
+    return missIds;
+  }
+
+  // 维护群成员信息
+  async updateGroupMembers(appId: string, groupId: string) {
+    const count = await this.prisma.wxGroup.count({ where: { id: groupId } });
+    if (count === 0) return;
+    // 获取群成员列表信息
+    this.prisma.$transaction(async client => {
+      const gropuInfo = await this.geweService.roomMemberList(appId, groupId);
+      const list = gropuInfo.memberList;
+      await client.wxContact.createMany({
+        data: list.map(item => {
+          return {
+            id: item.wxid,
+            nickName: item.nickName,
+            bigHeadImgUrl: item.bigHeadImgUrl,
+            smallHeadImgUrl: item.smallHeadImgUrl,
+          };
+        }),
+        skipDuplicates: true,
+      });
+      await client.wxGroup.update({
+        where: { id: groupId },
+        data: {
+          contacts: {
+            connect: list.map(item => ({ id: item.wxid })),
+          },
+        },
+      });
+    });
   }
 }
