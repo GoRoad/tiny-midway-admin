@@ -1,4 +1,4 @@
-import { Inject } from '@midwayjs/core';
+import { Inject, Post, Body } from '@midwayjs/core';
 import { BaseController } from '../../../core/crud_controller';
 import { Crud } from '../../../core/crud_decorator';
 import { GropuService } from '../service/group.service';
@@ -14,4 +14,9 @@ import { JwtPassportMiddleware } from '../../../middleware/jwt.middleware';
 export class GropuController extends BaseController {
   @Inject()
   protected service: GropuService;
+
+  @Post('/getChatroomMemberList')
+  public async getChatroomMemberList(@Body('id') id: string) {
+    return this.service.getChatroomMemberList(id);
+  }
 }

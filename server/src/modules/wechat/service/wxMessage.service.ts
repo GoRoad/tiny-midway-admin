@@ -61,7 +61,7 @@ export class WxMessageService {
           sender,
           emModelId: aiBot.emModelId,
         };
-        const res = aiBot.useDataSource 
+        const res = aiBot.useDataSource
           ? await this.AgentService.wxGroupAgent(searchParam)
           : await llm.invoke(messages);
         return this.sendMsg(msg.appid, msg.fromId, res.content.toString());
@@ -261,6 +261,7 @@ export class WxMessageService {
       await client.wxGroup.update({
         where: { id: groupId },
         data: {
+          chatRoomOwner: gropuInfo.chatroomOwner,
           contacts: {
             connect: list.map(item => ({ id: item.wxid })),
           },

@@ -63,7 +63,7 @@ export class AgentService {
 
       const response = await agentExecutor.invoke({ input });
       console.log('@agent调试: wxGroupAgent: ', response);
-      let res = response.output;
+      let res = response.output || '没有结果输出';
       console.log('res: ', typeof res, res);
       if (typeof res === 'string') {
         return { content: res };

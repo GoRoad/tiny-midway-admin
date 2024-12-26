@@ -10,4 +10,13 @@ export class GropuService extends BaseService<WxGroup> {
   protected get model() {
     return this.prismaClient.wxGroup;
   }
+
+  public async getChatroomMemberList(id: string): Promise<any> {
+    return this.model.findFirst({
+      where: { id },
+      include: {
+        contacts: true,
+      },
+    });
+  }
 }

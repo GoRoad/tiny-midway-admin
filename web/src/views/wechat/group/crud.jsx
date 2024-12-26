@@ -38,10 +38,19 @@ export const addRequest = async ({ form }) => {
   return await request.post(API_PREFIX + "/", form);
 };
 
+export const getChatroomMemberList = async ({ form }) => {
+  return await request.post(API_PREFIX + "/getChatroomMemberList", form);
+};
+
+const showMemberList = async (context, row) => {
+  const { data } = await getChatroomMemberList({ form: { id: row.id } });
+  context.viewFormRef.value.openDialog(data)
+}
+
 /**
  * 定义一个CrudOptions生成器方法
  */
-export default function ({ expose, context }) {
+export default function ({ expose, context: _context }) {
   const opt = {
     crudOptions: {
       request: {
@@ -86,7 +95,7 @@ export default function ({ expose, context }) {
             col: { span: 14 },
           },
           column: {
-            width: 180,
+            // width: 180,
           },
         },
         id: {
@@ -102,7 +111,7 @@ export default function ({ expose, context }) {
             col: { span: 14 },
           },
           column: {
-            width: 200,
+            // width: 200,
           },
         },
         chatRoomOwner: {
@@ -128,6 +137,20 @@ export default function ({ expose, context }) {
                     object-fit="scale-down"
                     src={context.row.smallHeadImgUrl}
                   ></n-image>
+                </div>
+              );
+            },
+          },
+        },
+        _opt: {
+          title: '群成员',
+          form: { show: false },
+          column: {
+            // width: 120,
+            render(context) {
+              return (
+                <div>
+                  <n-button onClick={() => showMemberList(_context, context.row)}>查看</n-button>
                 </div>
               );
             },
@@ -179,5 +202,5 @@ export default function ({ expose, context }) {
       },
     },
   };
-  return createPermissionOpt(opt, context);
+  return createPermissionOpt(opt, _context);
 }
