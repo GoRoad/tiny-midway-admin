@@ -134,4 +134,12 @@ export class DictService {
     })
     return res
   }
+
+  async aiToolDict() {
+    const data = await this.prisma.tool.findMany();
+    const res = data.map(item => {
+      return { value: item.id, label: item.name }
+    })
+    return res
+  }
 }

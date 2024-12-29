@@ -240,8 +240,10 @@ model AIBot {
   name          String // 智能体名称
   description   String? // 简介，可选
   prompt        String? // 人设与回复逻辑，可选
+  agentPrompt   String? // 智能体逻辑
   plugins       String[] @default([]) // 插件id列表，默认为空数组
   useDataSource Boolean? // 是否有权存取聊天记录
+  useAgent      Boolean  @default(false) // 是否使用智能体
 
   singleChatPrefix String? // 私聊触发机器人的文本信息前缀
   singleListMode   Int // 私聊名单名单模式 1 黑名单 2 白名单
@@ -254,6 +256,8 @@ model AIBot {
   // 关联表
   workflow   Workflow?      @relation("AIBotWorkflows", fields: [workflowId], references: [id])
   workflowId Int?
+  // 关联工具
+  tools      Tool[]         @relation("AIBotTool")
   // 关联一个微信号
   wx         WxUser?        @relation("AIBotWxUsers", fields: [wxId], references: [wxId])
   wxId       String?        @unique
@@ -282,6 +286,22 @@ model Workflow {
   aiBot AIBot[] @relation("AIBotWorkflows")
 
   @@map("workflow")
+}
+
+// 工具，供ai调用
+model Tool {
+  id          Int      @id @default(autoincrement())
+  name        String // 工具名称
+  funcName    String // 函数名，英文
+  description String // 简介
+  code        String // 代码
+  permissions String[] @default([]) // 权限列表
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  AIBot AIBot[] @relation("AIBotTool")
+
+  @@map("tool")
 }
 
 model WxContact {

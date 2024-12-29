@@ -59,4 +59,10 @@ export class DictController {
   async getWxGroupDict(@Query('q') q: string) {
     return this.dictService.getWxGroupFilterDict(q)
   }
+
+  // 获取ai工具字典
+  @Get('/openai/tools')
+  async getOpenAiTools() {
+    return this.dictService.aiToolDict()
+  }
 }

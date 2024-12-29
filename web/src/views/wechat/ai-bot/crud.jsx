@@ -144,11 +144,12 @@ export default function ({ crudExpose, context }) {
             width: 160,
           }
         },
-        useDataSource: {
-          title: "存取聊天记录",
+        useAgent: {
+          title: "智能体",
           type: 'dict-switch',
           form: {
-            // col: { span: 14 }
+            helper: '可以执行工具调用，搜索聊天记录等高级功能',
+            value: false,
           },
           dict: dict({
             data: [
@@ -157,6 +158,43 @@ export default function ({ crudExpose, context }) {
             ],
           }),
           column: { width: 120, }
+        },
+        useDataSource: {
+          title: "存取聊天记录",
+          type: 'dict-switch',
+          form: {
+            show: compute(({ form }) => {
+              const show = form?.useAgent
+              return show;
+            }),
+            helper: '智能体根据提示词来使用系统内置工具查询',
+            value: false,
+          },
+          dict: dict({
+            data: [
+              { value: true, label: '开启' },
+              { value: false, label: '关闭' },
+            ],
+          }),
+          column: { width: 120, show: false, }
+        },
+        tools: {
+          title: "调用工具",
+          type: "dict-select",
+          dict: dict({
+            url: '/base/dict/openai/tools',
+          }),
+          form: {
+            show: compute(({ form }) => {
+              const show = form?.useAgent
+              return show;
+            }),
+            component: { type: "select", multiple: true },
+            col: { span: 12 },
+          },
+          column: {
+            show: false,
+          },
         },
         emModelId: {
           title: '嵌入模型',
@@ -169,10 +207,10 @@ export default function ({ crudExpose, context }) {
             url: '/base/dict/openai/models',
           }),
           form: {
-            helper: '用于向量化聊天记录的存储和搜索',
+            helper: '用于存储聊天记录向量化供智能体使用',
             show: compute(({ form }) => {
-              const show = form?.useDataSource
-              return !!show;
+              const show = form?.useAgent && form?.useDataSource
+              return show;
             }),
             rule: [{ required: true, message: '请选择一个AI模型' }],
             // col: { span: 14 },
@@ -291,47 +329,56 @@ export default function ({ crudExpose, context }) {
           type: "text",
           form: {
             component: { type: "textarea", clearable: false },
-            col: { span: 18 },
+            col: { span: 24 },
           },
           column: {
             ellipsis: true,
           },
         },
         prompt: {
-          title: "人设与回复逻辑",
+          title: "AI提示词",
           type: "text",
           form: {
+            show: compute(({ form }) => {
+              const show = !form?.useAgent
+              return show;
+            }),
+            value: '你是一个乐于助人的助手，使用中文对话除非用户要求使用其他语言，回答应言简意赅',
             component: { type: "textarea", rows: 15, clearable: false },
-            col: { span: 18 },
+            col: { span: 24 },
           },
           column: {
             show: false,
             ellipsis: true,
           },
         },
-        // plugins: {
-        //   title: "插件列表",
-        //   type: "array",
-        //   form: {
-        //     component: { type: "select", mode: "multiple" },
-        //     col: { span: 14 },
-        //   },
-        //   column: {
-        //     show: false,
-        //   },
-        // },
-        // dataSource: {
-        //   title: "数据来源",
-        //   type: "array",
-        //   form: {
-        //     component: { type: "input", mode: "tags" },
-        //     col: { span: 14 },
-        //   },
-        //   column: {
-        //     show: true,
-        //     width: 160,
-        //   },
-        // },
+        agentPrompt: {
+          title: "智能体提示词",
+          type: "text",
+          form: {
+            show: compute(({ form }) => {
+              const show = form?.useAgent
+              return show;
+            }),
+            value: `作为乐于助人的AI助手，你需要遵循以下准则处理用户请求：
+  1. 优先考虑使用工具获取信息，特别是涉及实时数据
+  2. 可以使用工具查询的问题要一次性回答，不需要去询问用户
+  3. 如果对信息有疑虑，应该毫不犹豫的使用工具验证
+  4. 始终使用中文对话，除非用户要求使用其他语言
+回复要求：
+  - 确保信息准确有效性
+  - 避免使用未经验证的信息
+使用工具要求:
+  - 参数相同的情况下，不要重复调用工具`
+            ,
+            component: { type: "textarea", rows: 15, clearable: false },
+            col: { span: 24 },
+          },
+          column: {
+            show: false,
+            ellipsis: true,
+          },
+        },
         createdAt: {
           title: "创建时间",
           type: "text",
@@ -389,7 +436,7 @@ export default function ({ crudExpose, context }) {
           groups: {
             base: {
               tab: '基础设置',
-              columns: ['id', 'name', 'wxId', 'modelId', 'useDataSource', 'emModelId', 'description', 'prompt'],
+              columns: ['id', 'name', 'wxId', 'modelId', 'description', 'useAgent', 'useDataSource', 'tools', 'emModelId', 'prompt','agentPrompt'],
               slots: {
                 tab: (scope) => {
                   return (

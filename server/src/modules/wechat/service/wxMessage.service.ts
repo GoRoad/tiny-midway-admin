@@ -39,7 +39,12 @@ export class WxMessageService {
 
   async handleTextMsg(msg: Message): Promise<void> {
     // 检查是否配置了机器人
-    const aiBot = await this.prisma.aIBot.findFirst({ where: { wxId: msg.wxid } });
+    const aiBot = await this.prisma.aIBot.findFirst({ 
+      where: { wxId: msg.wxid },
+      include: {
+        tools: true,
+      }
+    });
     if (!aiBot) return console.log('未配置AI机器人!');
     const text = msg.text();
     if (msg.isRoom) {
@@ -59,10 +64,10 @@ export class WxMessageService {
           input,
           groupId: msg.fromId,
           sender,
-          emModelId: aiBot.emModelId,
+          aiBot,
         };
-        const res = aiBot.useDataSource
-          ? await this.AgentService.wxGroupAgent(searchParam)
+        const res = aiBot.useAgent
+          ? await this.AgentService.wxAgent(searchParam)
           : await llm.invoke(messages);
         return this.sendMsg(msg.appid, msg.fromId, res.content.toString());
       }

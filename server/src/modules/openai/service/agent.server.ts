@@ -1,6 +1,6 @@
 
-import { Provide, Inject } from '@midwayjs/core';
-import { PrismaClient } from '@prisma/client';
+import { Provide, Inject, makeHttpRequest } from '@midwayjs/core';
+import { PrismaClient, Tool } from '@prisma/client';
 import { HistoryService } from '../../wechat/service/history.service';
 import { GeweService } from '../../wechat/service/gewe.service';
 
@@ -9,6 +9,8 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import * as vm from "vm";
+import * as _ from 'lodash';
 
 import { SearchParam } from "../dto/dto";
 
@@ -21,12 +23,101 @@ export class AgentService {
   @Inject()
   geweService: GeweService;
 
+  // 微信智能体
+  async wxAgent(options: SearchParam) {
+    // 创建工具沙盒环境
+    const createVmTools = async (data: Tool) => {
+      try {
+        const code = `
+        (async function() {
+          ${data.code}
+          return { func, schema };
+        })();
+        `;
+        /**
+         * 沙盒环境，有逃逸漏洞
+         * The node:vm module is not a security mechanism. Do not use it to run untrusted code.
+         * node:vm模块不是一种安全机制。不要用它来运行不受信任的代码。
+         * https://nodejs.org/api/vm.html
+         */
+        const context = vm.createContext({ z, console, makeHttpRequest, _ });
+        const vmScript = new vm.Script(code);
+        const res = await vmScript.runInContext(context)
+        const _tool = {
+          func: res.func,
+          fields: {
+            name: data.funcName,
+            description: data.description,
+            schema: res.schema
+          },
+        }
+        return tool(_tool.func, _tool.fields);
+      } catch (error) {
+        console.log('@createVmTools error: ', error);
+        return null;
+      }
+    }
+
+    try {
+      const { llm, input, groupId, sender, aiBot } = options;
+      // 创建代理方法
+      const prompt = ChatPromptTemplate.fromMessages([
+        ['system', aiBot.agentPrompt || ''],
+        ['system', `背景信息：
+          - 你处在一个聊天群组内部，用户是群内一员。
+          - 当前时间：${new Date().toLocaleString()}、用户ID: ${sender}、群ID: ${groupId}。`
+        ],
+        ['placeholder', '{chat_history}'],
+        ['human', '{input}'],
+        ['placeholder', '{agent_scratchpad}'],
+      ]);
+      // 智能体可以调用的工具
+      const tools = [];
+      // 生成用户配置的工具
+      if (aiBot?.tools?.length) {
+        for (const toolData of aiBot.tools) {
+          const toolInstance = await createVmTools(toolData);
+          if (toolInstance) {
+            tools.push(toolInstance);
+          }
+        }
+      }
+      // 用户是否允许使用聊天记录工具
+      if (aiBot.useDataSource) {
+        const groupHistory = await this.createRagSearchGroupTool(groupId, aiBot.emModelId);
+        const groupMember = await this.createGroupAndMemberTool(options.appId);
+        tools.push(groupMember, groupHistory);
+      }
+      const agent = createToolCallingAgent({ llm, tools, prompt });
+      const agentExecutor = new AgentExecutor({
+        agent,
+        tools,
+        verbose: false,
+        maxIterations: 10, // 本次会话工具最大可调用次数
+        handleParsingErrors: 'Please try again, paying close attention to the allowed enum values',
+        returnIntermediateSteps: false
+      });
+
+      const response = await agentExecutor.invoke({ input });
+      console.log('@agent调试 wxAgent: ', response);
+      let res = response.output || '没有结果输出';
+      if (typeof res === 'string') {
+        return { content: res };
+      } else {
+        return { content: JSON.stringify(res) };
+      }
+    } catch (error) {
+      console.error('@agent调试 wxAgent: ', error);
+      return error;
+    }
+  }
+
   // 微信群助手
   async wxGroupAgent(options: SearchParam) {
     try {
-      const { llm, input, groupId, sender } = options;
+      const { llm, input, groupId, sender, aiBot } = options;
       // 封装工具
-      const groupHistory = await this.createRagSearchGroupTool(groupId, options.emModelId);
+      const groupHistory = await this.createRagSearchGroupTool(groupId, aiBot.emModelId);
       const groupMember = await this.createGroupAndMemberTool(options.appId);
       const tools = [groupMember, groupHistory];
       // 创建代理方法
@@ -79,9 +170,9 @@ export class AgentService {
   // 思考上下文消耗更多的token
   async wxGroupReactAgent(options: SearchParam) {
     try {
-      const { llm, input, groupId, sender } = options;
+      const { llm, input, groupId, sender, aiBot } = options;
       // 封装工具
-      const groupHistory = await this.createRagSearchGroupTool(groupId, options.emModelId);
+      const groupHistory = await this.createRagSearchGroupTool(groupId, aiBot.emModelId);
       const groupMember = await this.createGroupAndMemberTool(options.appId);
       const tools = [groupMember, groupHistory];
 

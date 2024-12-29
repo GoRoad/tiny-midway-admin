@@ -689,6 +689,28 @@ const main = async () => {
     updateTime: new Date(),
   });
 
+  await insertResource({
+    name: 'AI工具',
+    code: 'AiTool',
+    type: 'MENU',
+    parent: {
+      connect: { id: parent.id },
+    },
+    path: '/src/openai/tool',
+    redirect: null,
+    icon: 'i-fe:tool',
+    component: '/src/views/openai/tool/index.vue',
+    layout: '',
+    keepAlive: null,
+    method: null,
+    description: null,
+    show: true,
+    enable: true,
+    order: 1,
+    createTime: new Date(),
+    updateTime: new Date(),
+  });
+
   // 插入个人资料菜单
   await insertResource({
     name: '个人资料',
@@ -722,7 +744,7 @@ const main = async () => {
     'DataFile', 'SysMgt', 'ResourceMgt', 'RoleMgt', 'UserMgt', 'UserProfile',
     'demo:crud:add', 'demo:crud:remove', 'demo:crud:edit', 'demo:crud:view',
     'WxMgt', 'WxAccountMgt', 'WxBot', 'WxContacts', 'WxGroup', 'WxHistory',
-    'ModelMgt', 'ModelCfg'
+    'ModelMgt', 'ModelCfg', 'AiTool',
   ];
 
   for (const code of accessCodes) {
