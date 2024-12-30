@@ -65,7 +65,7 @@ npm run dev
 http://localhost:3200/
 
 ## 学习互助群
-开发板，还未稳定，谢谢关注!
+开发版，还未稳定，谢谢关注!
 
 说明：目前项目还不稳定，测试（踩坑）为主，我会尽快修复，Peace and love.
 <img src="" alt="Alt Text" width="300" height="200">
