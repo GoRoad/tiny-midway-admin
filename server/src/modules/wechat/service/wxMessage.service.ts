@@ -39,7 +39,7 @@ export class WxMessageService {
 
   async handleTextMsg(msg: Message): Promise<void> {
     // 检查是否配置了机器人
-    const aiBot = await this.prisma.aIBot.findFirst({ 
+    const aiBot = await this.prisma.aIBot.findFirst({
       where: { wxId: msg.wxid },
       include: {
         tools: true,
@@ -80,7 +80,17 @@ export class WxMessageService {
         const chat = await this.aIModelService.getOpenAIModel(aiBot.modelId);
         const input = text.slice(prefix ? prefix.length : 0);
         const messages = [new SystemMessage(aiBot?.prompt || ''), new HumanMessage(input)];
-        const res = await chat.invoke(messages);
+        const searchParam = {
+          appId: msg.appid,
+          llm: chat,
+          input,
+          groupId: '',
+          sender: msg.fromId,
+          aiBot,
+        };
+        const res = aiBot.useAgent
+          ? await this.AgentService.wxAgent(searchParam)
+          : await chat.invoke(messages);
         return this.sendMsg(msg.appid, msg.fromId, res.content.toString());
       }
     }

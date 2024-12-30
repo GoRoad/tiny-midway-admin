@@ -72,7 +72,7 @@ export default function ({ crudExpose, context }) {
   };
   const loadEditor = (e, val) => {
     // 默认示例
-    const fragment = 'return `从${args.from}到${args.to}距离是50公里`;'
+    const fragment = 'const result = {res: `从${args.from}到${args.to}距离是50公里`};'
     const def_code = `// 最基础的工具模板，创建工具必须使用schema、func两个对象
 const schema = z.object({
   from: z.string().describe("起点位置"),
@@ -85,8 +85,9 @@ const func = async (args) => {
   // console、 lodash as _、 makeHttpRequest
   // makeHttpRequest() 用于调用后端接口
   console.log("工具被调用，参数: ", args);
-  // 必须返回字符串
+  // 必须返回字符串，某些模型需要返回JSON字符串才能识别
   ${fragment}
+  return JSON.stringify(result);
 };`;
     const img = e.currentTarget;
     const parent = img.parentNode;
@@ -145,7 +146,7 @@ const func = async (args) => {
           form: {
             component: { placeholder: "函数名称，智能体据此判断工具的用途", },
             rule: [
-              { required: true, message: "请输入内容", trigger: "blur" }, 
+              { required: true, message: "请输入内容", trigger: "blur" },
               // 正则检查智能输入英文
               { pattern: /^[a-zA-Z]+$/, message: "请输入英文", trigger: "blur" }
             ],

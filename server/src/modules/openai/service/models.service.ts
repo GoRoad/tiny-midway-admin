@@ -2,7 +2,8 @@ import { Inject, Provide, makeHttpRequest } from '@midwayjs/core';
 import { PrismaClient, AIModelConfig } from '@prisma/client';
 import { BaseService } from '../../../core/crud_service';
 
-import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai';
+// import { ChatOpenAIFields } from '@langchain/openai';
+import { initChatModel } from "langchain/chat_models/universal";
 
 @Provide()
 export class AIModelService extends BaseService<AIModelConfig> {
@@ -16,14 +17,15 @@ export class AIModelService extends BaseService<AIModelConfig> {
   /**
    * openai
    */
-  public async getOpenAIModel(id: number) {
+  public async getOpenAIModel(id: number):Promise<any> {
     const aiModel = await this.model.findUnique({ where: { id } });
     if (!aiModel) throw new Error('模型未配置!');
     let baseURL = aiModel.baseURL;
     if (aiModel.type === 'openAi') baseURL += '/chat/completions'
-    const modelOptions: ChatOpenAIFields = {
+    const modelOptions = {
       apiKey: aiModel.apiKey,
       model: aiModel.model,
+      modelProvider: 'openai',
       temperature: aiModel.temperature,
       maxTokens: aiModel.maxTokens,
       configuration: {
@@ -32,8 +34,8 @@ export class AIModelService extends BaseService<AIModelConfig> {
     };
     if (!aiModel.temperature) delete modelOptions.temperature;
     if (!aiModel.maxTokens) delete modelOptions.maxTokens;
-    const openai = new ChatOpenAI(modelOptions);
-    return openai;
+    // 创建可变配置模型
+    return initChatModel(undefined, modelOptions);
   }
 
   public async embedding(emModelId: number, text: string) {

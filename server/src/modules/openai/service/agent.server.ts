@@ -8,6 +8,7 @@ import { createToolCallingAgent, AgentExecutor } from "langchain/agents";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { tool } from "@langchain/core/tools";
+
 import { z } from "zod";
 import * as vm from "vm";
 import * as _ from 'lodash';
@@ -64,8 +65,11 @@ export class AgentService {
       const prompt = ChatPromptTemplate.fromMessages([
         ['system', aiBot.agentPrompt || ''],
         ['system', `背景信息：
-          - 你处在一个聊天群组内部，用户是群内一员。
-          - 当前时间：${new Date().toLocaleString()}、用户ID: ${sender}、群ID: ${groupId}。`
+          ${groupId ? '- 你处在一个聊天群组内部，用户是群内一员。': '- 你现在是私聊模式，不在群组中，直接与用户一对一对话。'}
+          - 当前时间：${new Date().toLocaleString()}
+          - 用户的ID: ${sender}
+          ${ groupId ? '- 群的ID: ' + groupId: ''}
+          `
         ],
         ['placeholder', '{chat_history}'],
         ['human', '{input}'],
@@ -98,7 +102,9 @@ export class AgentService {
         returnIntermediateSteps: false
       });
 
-      const response = await agentExecutor.invoke({ input });
+      const response = await agentExecutor.invoke({ input }, {
+        configurable: { temperature: 0.1 },
+      });
       console.log('@agent调试 wxAgent: ', response);
       let res = response.output || '没有结果输出';
       if (typeof res === 'string') {
