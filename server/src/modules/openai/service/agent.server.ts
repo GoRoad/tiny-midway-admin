@@ -65,7 +65,7 @@ export class AgentService {
       const prompt = ChatPromptTemplate.fromMessages([
         ['system', aiBot.agentPrompt || ''],
         ['system', `背景信息：
-          ${groupId ? '- 你处在一个聊天群组内部，用户是群内一员。': '- 你现在是私聊模式，不在群组中，直接与用户一对一对话。'}
+          ${groupId ? '- 你处在一个聊天群组内部，用户是群内一员，你有权使用工具查询群组、用户信息。': '- 你现在是私聊模式，不在群组中，直接与用户一对一对话。'}
           - 当前时间：${new Date().toLocaleString()}
           - 用户的ID: ${sender}
           ${ groupId ? '- 群的ID: ' + groupId: ''}
@@ -89,15 +89,16 @@ export class AgentService {
       // 用户是否允许使用聊天记录工具
       if (aiBot.useDataSource) {
         const groupHistory = await this.createRagSearchGroupTool(groupId, aiBot.emModelId);
-        const groupMember = await this.createGroupAndMemberTool(options.appId);
-        tools.push(groupMember, groupHistory);
+        const groupInfo = await this.createGroupInfoTool(options.appId);
+        const memberInfo = await this.createMemberTool(options.appId);
+        tools.push(groupInfo, memberInfo, groupHistory);
       }
       const agent = createToolCallingAgent({ llm, tools, prompt });
       const agentExecutor = new AgentExecutor({
         agent,
         tools,
         verbose: false,
-        maxIterations: 10, // 本次会话工具最大可调用次数
+        maxIterations: 6, // 本次会话工具最大可调用次数
         handleParsingErrors: 'Please try again, paying close attention to the allowed enum values',
         returnIntermediateSteps: false
       });
@@ -124,7 +125,7 @@ export class AgentService {
       const { llm, input, groupId, sender, aiBot } = options;
       // 封装工具
       const groupHistory = await this.createRagSearchGroupTool(groupId, aiBot.emModelId);
-      const groupMember = await this.createGroupAndMemberTool(options.appId);
+      const groupMember = await this.createMemberTool(options.appId);
       const tools = [groupMember, groupHistory];
       // 创建代理方法
       const prompt = ChatPromptTemplate.fromMessages([
@@ -179,7 +180,7 @@ export class AgentService {
       const { llm, input, groupId, sender, aiBot } = options;
       // 封装工具
       const groupHistory = await this.createRagSearchGroupTool(groupId, aiBot.emModelId);
-      const groupMember = await this.createGroupAndMemberTool(options.appId);
+      const groupMember = await this.createMemberTool(options.appId);
       const tools = [groupMember, groupHistory];
 
       // 创建react代理
@@ -240,7 +241,7 @@ export class AgentService {
     const toolSchema = {
       name: 'searchChatHistory',
       description: `
-        查询聊天群内的聊天记录:
+        查询群内部的聊天记录:
         - **只能通过成员ID进行查询，不支持昵称查询。**
         - 查询时间默认起止时间为1天前00:00:01到当前时间。
         - 查询时间最大只能7天范围内，如果查询条件为全部、所有、一切等时间条件，那么起止时间为7天前00:00:01到当前时间。
@@ -249,55 +250,80 @@ export class AgentService {
           例子：[{ groupId: '123@chatroom', postTime: '2022-12-16T17:56:42.054Z', content: '内容', sender_nickName: '助手', sender_id: 'ai', receiver_nickName: '群成员', receiver_id: 'abc123' }]。
       `,
       schema: z.object({
-        keyword: z.string().optional().describe('搜索聊天内容的关键字, 如果搜索全部信息就不传'),
-        sender: z.string().optional().describe('查询成员的聊天记录传成员ID，如果查询所有成员就不传，不支持通过昵称查询'),
-        starTtime: z.string().describe('开始时间，格式为 yyyy-MM-dd HH:mm:ss，没有指定该参数为昨天00:00:01'),
+        keyword: z.string().optional().describe('搜索聊天内容关键字, 如果搜索全部记录不传'),
+        sender: z.string().optional().describe('成员ID，查询指定成员记录，查询所有成员记录不传。不支持通过昵称查询'),
+        starTime: z.string().describe('开始时间，格式为 yyyy-MM-dd HH:mm:ss，没有指定该参数为昨天00:00:01'),
         endTime: z.string().describe('结束时间,按天查询的话时分秒应该为23:59:59，格式为 yyyy-MM-dd HH:mm:ss，没有指定该参数为当前时间'),
-      }).describe('只能通过成员ID、群ID、聊天内容关键字来搜索群内的聊天记录，不支持其他的查询条件')
+      }).describe('查询群内部的聊天记录，不支持昵称等未定义的参数作为查询条件')
     }
     return tool(async (input) => {
       console.log('@ai入参 rag: ', input);
-      const { keyword, sender, starTtime, endTime } = input;
+      const { keyword, sender, starTime, endTime } = input;
       // 导入测试历史数据
-      const history = await this.historyService.getRagGroupHistory(emModelId, keyword, groupId, sender, starTtime, endTime);
-      const res = { query: { starTtime, endTime }, history }
+      const history = await this.historyService.getRagGroupHistory(emModelId, keyword, groupId, sender, starTime, endTime);
+      const res = { query: { starTime, endTime }, history }
       console.log('@@@history: ', res);
       return JSON.stringify(res);
     }, toolSchema);
   }
 
-  // 群/群成员资料获取工具
-  async createGroupAndMemberTool(appId: string) {
+  // 群资料获取工具
+  async createGroupInfoTool(appId: string) {
     const toolSchema = {
-      name: 'getGroupAndMemberInfo',
+      name: 'getGroupInfo',
       description: `
-        通过ID查询群或者群成员的详细信息:
+        通过群ID查询群的详细信息:
         - 查询聊天群的详细信息，包括群ID、群名称、群简介。
-        - 查询群成员的详细信息，包括成员ID、昵称、头像、性别、地区。
       `,
       schema: z.object({
-        groupId: z.string().describe('需要查询的群ID，文本类型，例子 "123@chatroom" '),
-        sender: z.string().optional().describe('需要查询的成员ID，文本类型，例子 "abc123"，如果传递昵称，可以不传成员ID '),
-        nickName: z.string().describe('需要查询的成员昵称，文本类型，例子 "张国荣" '),
-      }).describe('只能通过成员的ID、群ID来查询群或者群成员昵称性别等详细信息，不支持其他的查询条件')
+        groupId: z.string().describe('需要查询的群ID，文本类型，例子 "123@chatroom" ')
+      })
     }
     return tool(async (input) => {
-      console.log('@ai入参 info: ', input);
-      const { groupId, sender, nickName } = input;
+      console.log('@ai入参 GroupInfo: ', input);
+      const { groupId } = input;
+      const data = await this.geweService.contactsInfo(appId, [groupId]);
+      return JSON.stringify(data);
+    }, toolSchema);
+  }
+
+  // 用户资料获取工具
+  async createMemberTool(appId: string) {
+    const toolSchema = {
+      name: 'getMemberInfo',
+      description: `
+        通过用户/群成员的id或者昵称查询详细信息:
+        - 查询用户的详细信息，包括昵称、头像、性别、地区。
+      `,
+      schema: z.object({
+      wxId: z.string()
+        .regex(/^[a-zA-Z0-9_-]+$/, '用户/群成员ID仅能包含英文字母、数字、下划线和减号')
+        .optional()
+        .describe('需要查询的用户/群成员 ID，例如 "abc-123"、"wxid_abc123"， 使用昵称查询可以不穿'),
+      nickName: z.string()
+        .optional()
+        .describe('需要查询的用户昵称，例如 "张国荣"、"tom1900"'),
+    }).describe('如果不确定参数是用户/群成员ID 、还是昵称，请将参数作为 nickName 传递')
+    }
+    return tool(async (input) => {
+      console.log('@ai入参 MemberInfo: ', input);
+      // const parsedInput = toolSchema.schema.parse(input);
+      const { wxId, nickName } = input;
       let data = {};
       if (nickName) {
         data = await this.prisma.wxContact.findFirst({
           where: {
             nickName: {
-            contains: nickName, // 模糊匹配 nickName
-            mode: 'insensitive', // 可选：忽略大小写
+              contains: nickName, // 模糊匹配 nickName
+              mode: 'insensitive', // 可选：忽略大小写
             },
           },
         });
-      } else {
-        data = await this.geweService.contactsInfo(appId, [groupId, sender]);
       }
-      console.log('@@@info: ', data);
+      if (!data && nickName) {
+        data = await this.geweService.contactsInfo(appId, [wxId]);
+      }
+      console.log('@@@Member-info: ', data);
       return JSON.stringify(data);
     }, toolSchema);
   }
