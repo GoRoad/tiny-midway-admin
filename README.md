@@ -43,24 +43,33 @@ docker run --name pgvector --restart=always -e POSTGRES_USER=pgvector -e POSTGRE
 - 创建数据库：tiny_admin
 - 修改/server/.env数据库配置 DATABASE_URL="postgresql://user:pwd@host:port/tiny_admin?schema=public"
 
-数据库初始化
-```bash
-npx prisma migrate deploy
-npm run prisma:init
-```
-运行前端
+安装前端
 ```bash
 cd web
 npm i
-npm run dev
 ```
-运行后端
-
+安装后端
 ```bash
 cd server
 npm i
+```
+
+数据库初始化
+```bash
+cd server
+npx prisma migrate deploy
+npm run prisma:init
+```
+运行项目
+```bash
+# 前端
+cd web
+npm run dev
+# 后端
+cd server
 npm run dev
 ```
+
 > 访问web界面
 http://localhost:3200/
 
